@@ -1,34 +1,42 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { BotService } from './bot.service';
-import { CreateBotDto } from './dto/create-bot.dto';
-import { UpdateBotDto } from './dto/update-bot.dto';
+import { InviteDto } from './dto/invite.dto';
+import { PlaceShipDto } from './dto/place-ship.dto';
+import { ShootDto } from './dto/shoot.dto';
+import { NotifyDto } from './dto/notify.dto';
+import { GameOverDto } from './dto/game-over.dto';
 
-@Controller('bot')
+@Controller('')
 export class BotController {
   constructor(private readonly botService: BotService) {}
 
-  @Post()
-  create(@Body() createBotDto: CreateBotDto) {
-    return this.botService.create(createBotDto);
+  @Get("/ping")
+  ping() {
+    return "Server is active now!";
   }
 
-  @Get()
-  findAll() {
-    return this.botService.findAll();
+  @Post("/invite")
+  create(@Body() inviteDto: InviteDto) {
+    return this.botService.invite(inviteDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.botService.findOne(+id);
+  @Post("/place-ships")
+  placeShips(@Body() placeShipDto: PlaceShipDto) {
+    return this.botService.placeShips(placeShipDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBotDto: UpdateBotDto) {
-    return this.botService.update(+id, updateBotDto);
+  @Post("/shoot")
+  shoot(@Body() shootDto: ShootDto) {
+    return this.botService.shoot(shootDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.botService.remove(+id);
+  @Post("/notify")
+  notify(@Body() notifyDto: NotifyDto) {
+    return this.botService.notify(notifyDto);
+  }
+
+  @Post("/game-over")
+  gameOver(@Body() gameOverDto: GameOverDto) {
+    return this.botService.gameOver(gameOverDto);
   }
 }

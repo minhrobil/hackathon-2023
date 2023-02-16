@@ -1,0 +1,59 @@
+Game Engine (GE):
+・Call đến các AI service và hiển thị các thông tin và kết quả bằng video và audio 
+・Quyết định kết quả thắng thua giữa 2 AI service 
+
+Cách thức tham gia:
+・Xây dựng một application (AI service) phục vụ HTTP request với I/F được cung cấp sẵn để làm việc với GE 
+
+Đối tượng thi đấu:
+・Giữa 2 AI services
+
+Các loại tàu:
+・Carrier (5 ô)
+・BattleShip (4 ô thẳng hàng)
+・OilRig (4 ô hình vuông)
+・Cruiser (3 ô thẳng hàng)
+・Destroyer (2 ô)
+
+*Note: có thể xếp ngang hoặc dọc tùy ý
+
+
+Tổng quan:
+・ Cố gắng đoán vị trí của các tàu của AI đối phương đã sắp xếp trên Map
+・ Bắn chìm tất cả các tàu của AI đổi thủ bằng cách đoán chính xác vị trí và hình dạng của chúng
+・ Người chơi đầu tiên bắn chìm tất cả các tàu đối phương sẽ thắng trò chơi.
+
+
+Luật xếp tàu:			
+  ・Map có kích thước 8 x 20 ô, mỗi ô tương ứng với 1 điểm (x, y) thỏa mãn 0 <= x < 20, 0 <= y < 8 		
+  ・Mỗi tàu phải được xếp theo chiều ngang hoặc dọc trong phạm vi của Map		
+  ・Các tàu không được xếp chồng lên nhau (vị trí đặt tàu bị trùng ở  1 điểm bất kỳ) 					
+  ・Không thể xếp tàu ngoài phạm vi của Map
+  ・Vị trí của các tàu không được thay đổi sau khi Game bắt đầu					
+  ・Game Engine (GE) sẽ tạo ra dữ liệu (đề bài) về các loại tàu (trong 5 loại đã nêu trên) và kèm theo số lượng của mỗi loại tàu cho mỗi Game khi bắt đầu trận đấu
+					
+Luật chơi cơ bản:				
+  ・Game chơi theo lượt, mỗi lượt AI cần xác định 1 ô để bắn										
+  ・Khi bắt đầu trận đấu, GE sẽ call tới mỗi AI để gửi thông tin (đề bài) về Map, danh sách các loại tàu (loại + số lượng)
+  ・Tiếp đến GE sẽ call tới mỗi AI để lấy thông tin sắp xếp tàu. Nếu thông tin không hợp lệ thì AI đó sẽ bị xử THUA
+  ・Quy trình bắn theo lượt bắt đầu					
+  ・Với mỗi lượt bắn, GE sẽ call AI để nhận thông tin vị trí (x, y) mà AI đó sẽ bắn				
+  ・AI sẽ nhận được thông báo về kết quả của lượt bắn vừa thực hiện (trúng hay trật) và thông tin toàn bộ vị trí của tàu nếu tàu chìm				
+  ・AI sẽ bị xử thua trong các trường hợp sau:					
+	1	Bị bắn chìm tất cả các tàu
+	2	Sắp xếp tàu không hợp lệ (bị chồng lên nhau / ngoài Map)
+	3	Vị trí bắn (x, y) không hợp lệ
+	4	Số lượng điểm bắn bằng Combo không hợp lệ (số điểm bắn nhiều hơn số Combo đang có)
+	5	Xuất hiện lỗi khi GE call yêu cầu đến
+	6	Xử lý request >=10s
+	7	Khai thác máy chủ trò chơi hoặc sử dụng dịch vụ trung gian để lấy dữ liệu nội bộ của đối phương
+					
+Luật Combo:					
+  ・Với mỗi tàu bị bắn chìm, AI sẽ nhận được thêm 1 điểm vào Combo (thêm 1 điểm bắn)
+  ・AI có thể quyết định sử dụng Combo hay không cho lần bắn hiện tại. Để sử dụng Combo, AI sẽ gửi lên GE nhiều vị trí bắn (x, y) thay vì chỉ 1 vị trí như thông thường.
+
+	Ví dụ: AI đang có 3 điểm Combo -> AI có thể sử dụng bắn Combo với n vị trí, với 1<n<=(3+1)
+	Nếu n=4, AI bắt buộc phải gửi 4 vị trí bắn lên cho GE
+
+  ・Sau khi thực hiện bắn Combo, tất cả các điểm Combo sẽ bị reset vê 0 ( ví dụ: số điểm Combo là 3 và AI chỉ sử dụng 2 điểm thì sau khi thực hiện điểm Combo vẫn sẽ bị reset về 0)
+				

@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { CreateBotDto } from './dto/create-bot.dto';
-import { UpdateBotDto } from './dto/update-bot.dto';
+import { InviteDto } from './dto/invite.dto';
+import { PlaceShipDto } from './dto/place-ship.dto';
+import { ShootDto } from './dto/shoot.dto';
+import { NotifyDto } from './dto/notify.dto';
+import { GameOverDto } from './dto/game-over.dto';
 
 @Injectable()
 export class BotService {
-  create(createBotDto: CreateBotDto) {
-    return 'This action adds a new bot';
+  invite(inviteDto: InviteDto) {
+    return inviteDto;
   }
 
-  findAll() {
-    return `This action returns all bot`;
+  placeShips(placeShipDto: PlaceShipDto) {
+    return placeShipDto;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bot`;
+  shoot(shootDto: ShootDto) {
+    return shootDto;
   }
 
-  update(id: number, updateBotDto: UpdateBotDto) {
-    return `This action updates a #${id} bot`;
+  notify(notifyDto: NotifyDto) {
+    return notifyDto;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bot`;
+  gameOver(gameOverDto: GameOverDto) {
+    return gameOverDto;
   }
 }
