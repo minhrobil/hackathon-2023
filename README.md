@@ -49,6 +49,6 @@ npm test
 Kiểm tra server có hoạt động không...
 
 ```sh
-GET: http://localhost:3000/bot/ping => Server is active now!
+GET: http://localhost:3000/ping => Server is active now!
 ```
 
