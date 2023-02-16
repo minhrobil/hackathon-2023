@@ -15,7 +15,7 @@ source ~/.bashrc
 ```sh
 nvm install 14
 ```
-- nest-cli: công cụ quản lý thư viện, follow https://docs.nestjs.com/
+- nest-cli: client của framework nestjs, follow https://docs.nestjs.com/
 ```sh
 npm i -g @nestjs/cli
 ```
