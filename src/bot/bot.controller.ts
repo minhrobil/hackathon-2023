@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers, Res, UseInterceptors } from '@nestjs/common';
 import { BotService } from './bot.service';
 import { InviteDto } from './dto/invite.dto';
 import { PlaceShipDto } from './dto/place-ship.dto';
 import { ShootDto } from './dto/shoot.dto';
 import { NotifyDto } from './dto/notify.dto';
 import { GameOverDto } from './dto/game-over.dto';
+import { HeaderDto } from './dto/header.dto';
+import { HeaderInterceptor } from './bot.interceptor';
+import { Response } from 'express';
 
 @Controller('')
 export class BotController {
@@ -16,27 +19,37 @@ export class BotController {
   }
 
   @Post("/invite")
-  create(@Body() inviteDto: InviteDto) {
-    return this.botService.invite(inviteDto);
+  @UseInterceptors(HeaderInterceptor)
+  create(@Body() inviteDto: InviteDto, @Res() res: Response) {
+    const data = this.botService.invite(inviteDto)
+    return res.json(data) 
   }
 
   @Post("/place-ships")
-  placeShips(@Body() placeShipDto: PlaceShipDto) {
-    return this.botService.placeShips(placeShipDto);
+  @UseInterceptors(HeaderInterceptor)
+  placeShips(@Body() placeShipDto: PlaceShipDto, @Res() res: Response) {
+    const data = this.botService.placeShips(placeShipDto);
+    return res.json(data) 
   }
 
   @Post("/shoot")
-  shoot(@Body() shootDto: ShootDto) {
-    return this.botService.shoot(shootDto);
+  @UseInterceptors(HeaderInterceptor)
+  shoot(@Body() shootDto: ShootDto, @Res() res: Response) {
+    const data = this.botService.shoot(shootDto);
+    return res.json(data) 
   }
 
   @Post("/notify")
-  notify(@Body() notifyDto: NotifyDto) {
-    return this.botService.notify(notifyDto);
+  @UseInterceptors(HeaderInterceptor)
+  notify(@Body() notifyDto: NotifyDto, @Res() res: Response) {
+    const data = this.botService.notify(notifyDto);
+    return res.json(data) 
   }
 
   @Post("/game-over")
-  gameOver(@Body() gameOverDto: GameOverDto) {
-    return this.botService.gameOver(gameOverDto);
+  @UseInterceptors(HeaderInterceptor)
+  gameOver(@Body() gameOverDto: GameOverDto, @Res() res: Response) {
+    const data = this.botService.gameOver(gameOverDto);
+    return res.json(data) 
   }
 }
