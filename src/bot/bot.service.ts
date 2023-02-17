@@ -4,9 +4,12 @@ import { PlaceShipDto } from './dto/place-ship.dto';
 import { ShootDto } from './dto/shoot.dto';
 import { NotifyDto } from './dto/notify.dto';
 import { GameOverDto } from './dto/game-over.dto';
+import { PlaceShipService } from './logic/placeShip.service';
 
 @Injectable()
 export class BotService {
+  constructor(private readonly placeShipService: PlaceShipService) {}
+
   private readonly board: Map<string, number> = new Map();
   private readonly coordinateStatus = {
     WATER: 0,
@@ -20,35 +23,34 @@ export class BotService {
   private boardWidth: number = 0
   private boardHeight: number =  0
 
+  private shipsInMyBoard = []
+  private player1 = null
+  private player2 = null
+
+
   invite(inviteDto: InviteDto) {
     this.boardWidth = inviteDto.boardWidth
     this.boardHeight = inviteDto.boardHeight
 
     this.board.clear()
+    this.shipsInMyBoard = []
+    this.player1 = null
+    this.player2 = null
 
-    for (let y = 0; y < this.boardHeight; y++) {
-      for (let x = 0; x < this.boardWidth; x++) {
-        this.board.set(''+x+y, this.coordinateStatus.WATER)
-      }
-    }
+    this.placeShipService.initBoard(this.board, this.boardWidth, this.boardHeight, this.coordinateStatus.WATER)
 
-    const ships = inviteDto.ships
+    const shipsInGame = inviteDto.ships
 
-    ships.forEach(shipType => {
-      for (let ship = 0; ship < shipType.quantity; ship++) {
-        this.getShipLocation(shipType.type)
-      }
-    });
+    this.placeShipService.placeShip(this.shipsInMyBoard, shipsInGame, this.board)
 
-    return inviteDto;
-  }
-
-  getShipLocation(shipType: string){
-    console.log(shipType);
+    return { success: true };
   }
 
   placeShips(placeShipDto: PlaceShipDto) {
-    return placeShipDto;
+    this.player1 = placeShipDto.player1
+    this.player2 = placeShipDto.player2
+
+    return { ships: this.shipsInMyBoard };
   }
 
   shoot(shootDto: ShootDto) {
