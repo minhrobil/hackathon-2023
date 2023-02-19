@@ -5,7 +5,6 @@ import { PlaceShipDto } from './dto/place-ship.dto';
 import { ShootDto } from './dto/shoot.dto';
 import { NotifyDto } from './dto/notify.dto';
 import { GameOverDto } from './dto/game-over.dto';
-import { HeaderDto } from './dto/header.dto';
 import { HeaderInterceptor } from './bot.interceptor';
 import { Response } from 'express';
 
