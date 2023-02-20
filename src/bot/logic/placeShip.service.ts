@@ -16,6 +16,7 @@ export class PlaceShipService {
   }
 
   getShipLocation(shipType: string, board: Map<string, number>) {
+    
     return {
       type: shipType,
       coordinates: [
