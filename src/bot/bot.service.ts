@@ -40,7 +40,7 @@ export class BotService {
     this.player1 = null
     this.player2 = null
 
-    this.placeShipService.initBoard(this.myBoard, this.enemyBoard, this.boardWidth, this.boardHeight, COORDINATE_STATUS.WATER)
+    this.placeShipService.initBoard(this.myBoard, this.enemyBoard, this.boardWidth, this.boardHeight)
     // this.placeShipService.initHuntShotStack(this.huntShotStack, this.boardWidth, this.boardHeight, this.currentTactic)
 
     const shipsInGame = inviteDto.ships

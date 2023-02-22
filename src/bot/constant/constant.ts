@@ -5,8 +5,9 @@ export const TACTIC = {
 }
 export const COORDINATE_STATUS = {
     WATER: 0, //Chưa bắn vào ô này
-    SHIP: 1, //Bắn trúng tàu 
-    SHOT: 2 //Bắn trượt
+    SHIP: 1, //Bắn trúng tàu, chưa chìm
+    SHOT: 2, //Bắn vào ô không có tàu
+    SUNK: 3 //Vị trí đã chìm của tàu 
 }
 
 export const MISSION_TYPE = {
