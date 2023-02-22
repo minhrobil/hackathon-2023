@@ -6,9 +6,8 @@ import { NotifyDto } from './dto/notify.dto';
 import { GameOverDto } from './dto/game-over.dto';
 import { PlaceShipService } from './logic/placeShip.service';
 import { ShootService } from './logic/shoot.service';
-import { Coordinate } from './entities/coordinate.entity';
-import { COORDINATE_STATUS, MISSION_TYPE, TACTIC } from './constant/constant';
-import { Stack } from './logic/stack.service';
+import { MISSION_TYPE } from './constant/constant';
+import { Game } from './logic/game.service';
 @Injectable()
 export class BotService {
   constructor(
@@ -16,66 +15,73 @@ export class BotService {
     private readonly shootService: ShootService,
   ) { }
 
-  private readonly currentTactic = TACTIC.TIGER
-  private readonly myBoard: Map<string, number> = new Map();//Bản đồ quân ta
+  private games: Map<string, Game> = new Map()
 
-  private readonly shipType = {
-    WATER: 0,
-    SHIP: 1
-  }
+  
+  invite(inviteDto: InviteDto, session: string) {
+    if(this.games.has(session)){
+      return { success: false }
+    }
+    const game: Game = new Game(session)
+    game.setBoardWidth(inviteDto.boardWidth)
+    game.setBoardHeight(inviteDto.boardHeight)
 
-  private boardWidth = 0
-  private boardHeight = 0
-
-  private shipsInMyBoard = []
-  private player1 = null
-  private player2 = null
-
-  invite(inviteDto: InviteDto) {
-    this.boardWidth = inviteDto.boardWidth
-    this.boardHeight = inviteDto.boardHeight
-
-    this.myBoard.clear()
-    this.shipsInMyBoard = []
-    this.player1 = null
-    this.player2 = null
-
-    this.placeShipService.initBoard(this.myBoard, this.enemyBoard, this.boardWidth, this.boardHeight)
-    // this.placeShipService.initHuntShotStack(this.huntShotStack, this.boardWidth, this.boardHeight, this.currentTactic)
+    this.placeShipService.initBoard(game.getMyBoard(), game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
+    this.placeShipService.initHuntShotQueue(game.getHuntShotQueue(), game.getBoardWidth(), game.getBoardHeight(), game.getCurrentTactic())
+    console.log(game.getHuntShotQueue().size());
+    console.log(game.getHuntShotQueue().pop());
+    console.log(game.getHuntShotQueue().size());
+    console.log(game.getHuntShotQueue().peek());
+    console.log(game.getHuntShotQueue().size());
 
     const shipsInGame = inviteDto.ships
+    this.placeShipService.placeShip(game.getShipsInMyBoard(), shipsInGame, game.getMyBoard())
+    this.games.set(session, game);
+    return { success: true };
+  }
 
-    this.placeShipService.placeShip(this.shipsInMyBoard, shipsInGame, this.myBoard)
+  placeShips(placeShipDto: PlaceShipDto, session: string) {
+    const game = this.games.get(session);
+    if(!game){
+      return { success: false }
+    }
+
+    game.setPlayer1(placeShipDto.player1)
+    game.setPlayer2(placeShipDto.player2)
+
+    return { ships: game.getShipsInMyBoard() };
+  }
+
+  shoot(shootDto: ShootDto, session: string) {
+    const game = this.games.get(session);
+    if(!game){
+      return { success: false }
+    }
+
+    if (game.getCurrentMission() === MISSION_TYPE.HUNTING) {
+      return this.shootService.huntShip(shootDto, game.getEnemyBoard(), game.getHuntShotQueue());
+    }
+    if (game.getCurrentMission() === MISSION_TYPE.TARGETING) {
+      return this.shootService.huntShip(shootDto, game.getEnemyBoard(), game.getHuntShotQueue());
+    }
+    return { success: true };
+  }
+
+  notify(notifyDto: NotifyDto, session: string) {
+    const game = this.games.get(session);
+    if(!game){
+      return { success: false }
+    }
 
     return { success: true };
   }
 
-  placeShips(placeShipDto: PlaceShipDto) {
-    this.player1 = placeShipDto.player1
-    this.player2 = placeShipDto.player2
-
-    return { ships: this.shipsInMyBoard };
-  }
-
-  private readonly enemyBoard: Map<string, number> = new Map(); //Bản đồ quân địch
-  private currentMission: number = MISSION_TYPE.HUNTING; //Mission hiện tại
-  private readonly huntShotStack: Stack<Coordinate> = new Stack()//Stack các toạ độ sẽ đi hunting theo chiến dịch
-
-  shoot(shootDto: ShootDto) {
-    if (this.currentMission === MISSION_TYPE.HUNTING) {
-      return this.shootService.huntShip(shootDto, this.enemyBoard, this.huntShotStack);
+  gameOver(gameOverDto: GameOverDto, session: string) {
+    const game = this.games.get(session);
+    if(!game){
+      return { success: false }
     }
-    if (this.currentMission === MISSION_TYPE.TARGETING) {
-      return this.shootService.huntShip(shootDto, this.enemyBoard, this.huntShotStack);
-    }
+
     return { success: true };
-  }
-
-  notify(notifyDto: NotifyDto) {
-    return notifyDto;
-  }
-
-  gameOver(gameOverDto: GameOverDto) {
-    return gameOverDto;
   }
 }

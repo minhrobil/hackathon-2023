@@ -7,6 +7,7 @@ import { NotifyDto } from './dto/notify.dto';
 import { GameOverDto } from './dto/game-over.dto';
 import { HeaderInterceptor } from './bot.interceptor';
 import { Response } from 'express';
+import { HeaderDto } from './dto/header.dto';
 
 @Controller('')
 export class BotController {
@@ -19,36 +20,41 @@ export class BotController {
 
   @Post("/invite")
   @UseInterceptors(HeaderInterceptor)
-  create(@Body() inviteDto: InviteDto, @Res() res: Response) {
-    const data = this.botService.invite(inviteDto)
+  create(@Body() inviteDto: InviteDto,@Headers() headers: HeaderDto, @Res() res: Response) {
+    const session: string = headers['x-session-id'] 
+    const data = this.botService.invite(inviteDto, session)
     return res.json(data) 
   }
 
   @Post("/place-ships")
   @UseInterceptors(HeaderInterceptor)
-  placeShips(@Body() placeShipDto: PlaceShipDto, @Res() res: Response) {
-    const data = this.botService.placeShips(placeShipDto);
+  placeShips(@Body() placeShipDto: PlaceShipDto,@Headers() headers: HeaderDto, @Res() res: Response) {
+    const session: string = headers['x-session-id'] 
+    const data = this.botService.placeShips(placeShipDto, session);
     return res.json(data) 
   }
 
   @Post("/shoot")
   @UseInterceptors(HeaderInterceptor)
-  shoot(@Body() shootDto: ShootDto, @Res() res: Response) {
-    const data = this.botService.shoot(shootDto);
-    return res.json(data) 
+  shoot(@Body() shootDto: ShootDto,@Headers() headers: HeaderDto, @Res() res: Response) {
+    const session: string = headers['x-session-id']
+    const data = this.botService.shoot(shootDto, session);
+    return res.json(data)
   }
 
   @Post("/notify")
   @UseInterceptors(HeaderInterceptor)
-  notify(@Body() notifyDto: NotifyDto, @Res() res: Response) {
-    const data = this.botService.notify(notifyDto);
+  notify(@Body() notifyDto: NotifyDto,@Headers() headers: HeaderDto, @Res() res: Response) {
+    const session: string = headers['x-session-id']
+    const data = this.botService.notify(notifyDto, session);
     return res.json(data) 
   }
 
   @Post("/game-over")
   @UseInterceptors(HeaderInterceptor)
-  gameOver(@Body() gameOverDto: GameOverDto, @Res() res: Response) {
-    const data = this.botService.gameOver(gameOverDto);
+  gameOver(@Body() gameOverDto: GameOverDto,@Headers() headers: HeaderDto, @Res() res: Response) {
+    const session: string = headers['x-session-id']
+    const data = this.botService.gameOver(gameOverDto, session);
     return res.json(data) 
   }
 }

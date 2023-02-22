@@ -14,3 +14,5 @@ export const MISSION_TYPE = {
     HUNTING: 0, //Chế độ đi săn
     TARGETING: 1, //Chế độ khoá mục tiêu
 }
+
+export const MY_PLAYER_ID = "BAOTHU"
