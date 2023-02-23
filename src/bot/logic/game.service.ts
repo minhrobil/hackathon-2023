@@ -24,215 +24,215 @@ export class Game {
     //Phan thong tin ke dich
     private enemyBoard: Map<string, number> = new Map(); //Bản đồ quân địch
     private huntShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi hunting theo chiến dịch ban dau
-    private shipCoordinateArea: Array<Coordinate> = new Array()//Danh sach cac toa do tau trong vung target hien tai
+    private shipCoordinatesInCurrentTargetArea: Array<Coordinate> = new Array()//Danh sach cac toa do tau trong vung target hien tai
     private targetShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi target trong vung hien tai
     /**
      * Getter currentMission
      * @return {number }
      */
-	public getCurrentMission(): number  {
-		return this.currentMission;
-	}
+    public getCurrentMission(): number {
+        return this.currentMission;
+    }
 
     /**
      * Setter currentMission
      * @param {number } value
      */
-	public setCurrentMission(value: number ) {
-		this.currentMission = value;
-	}
+    public setCurrentMission(value: number) {
+        this.currentMission = value;
+    }
 
     /**
      * Getter boardWidth
      * @return {number }
      */
-	public getBoardWidth(): number  {
-		return this.boardWidth;
-	}
+    public getBoardWidth(): number {
+        return this.boardWidth;
+    }
 
     /**
      * Getter boardHeight
      * @return {number }
      */
-	public getBoardHeight(): number  {
-		return this.boardHeight;
-	}
+    public getBoardHeight(): number {
+        return this.boardHeight;
+    }
 
     /**
      * Getter player1
      * @return {string }
      */
-	public getPlayer1(): string  {
-		return this.player1;
-	}
+    public getPlayer1(): string {
+        return this.player1;
+    }
 
     /**
      * Getter player2
      * @return {string }
      */
-	public getPlayer2(): string  {
-		return this.player2;
-	}
+    public getPlayer2(): string {
+        return this.player2;
+    }
 
     /**
      * Setter boardWidth
      * @param {number } value
      */
-	public setBoardWidth(value: number ) {
-		this.boardWidth = value;
-	}
+    public setBoardWidth(value: number) {
+        this.boardWidth = value;
+    }
 
     /**
      * Setter boardHeight
      * @param {number } value
      */
-	public setBoardHeight(value: number ) {
-		this.boardHeight = value;
-	}
+    public setBoardHeight(value: number) {
+        this.boardHeight = value;
+    }
 
     /**
      * Setter player1
      * @param {string } value
      */
-	public setPlayer1(value: string ) {
-		this.player1 = value;
-	}
+    public setPlayer1(value: string) {
+        this.player1 = value;
+    }
 
     /**
      * Setter player2
      * @param {string } value
      */
-	public setPlayer2(value: string ) {
-		this.player2 = value;
-	}
+    public setPlayer2(value: string) {
+        this.player2 = value;
+    }
 
 
     /**
      * Getter session
      * @return {string }
      */
-	public getSession(): string  {
-		return this.session;
-	}
+    public getSession(): string {
+        return this.session;
+    }
 
     /**
      * Getter currentTactic
      * @return {number }
      */
-	public getCurrentTactic(): number  {
-		return this.currentTactic;
-	}
+    public getCurrentTactic(): number {
+        return this.currentTactic;
+    }
 
     /**
      * Getter myBoard
      * @return {Map<string, number> }
      */
-	public getMyBoard(): Map<string, number>  {
-		return this.myBoard;
-	}
+    public getMyBoard(): Map<string, number> {
+        return this.myBoard;
+    }
 
     /**
      * Getter enemyBoard
      * @return {Map<string, number> }
      */
-	public getEnemyBoard(): Map<string, number>  {
-		return this.enemyBoard;
-	}
+    public getEnemyBoard(): Map<string, number> {
+        return this.enemyBoard;
+    }
 
     /**
      * Getter huntShotQueue
      * @return {Queue<Coordinate> }
      */
-	public getHuntShotQueue(): Queue<Coordinate>  {
-		return this.huntShotQueue;
-	}
+    public getHuntShotQueue(): Queue<Coordinate> {
+        return this.huntShotQueue;
+    }
 
     /**
-     * Getter getShipCoordinateArea
+     * Getter getShipCoordinatesInCurrentTargetArea
      * @return {Array<Coordinate> }
      */
-	public getShipCoordinateArea(): Array<Coordinate>  {
-		return this.shipCoordinateArea;
-	}
+    public getShipCoordinatesInCurrentTargetArea(): Array<Coordinate> {
+        return this.shipCoordinatesInCurrentTargetArea;
+    }
 
     /**
      * Setter session
      * @param {string } value
      */
-	public setSession(value: string ) {
-		this.session = value;
-	}
+    public setSession(value: string) {
+        this.session = value;
+    }
 
     /**
      * Setter currentTactic
      * @param {number } value
      */
-	public setCurrentTactic(value: number ) {
-		this.currentTactic = value;
-	}
+    public setCurrentTactic(value: number) {
+        this.currentTactic = value;
+    }
 
     /**
      * Setter myBoard
      * @param {Map<string, number> } value
      */
-	public setMyBoard(value: Map<string, number> ) {
-		this.myBoard = value;
-	}
+    public setMyBoard(value: Map<string, number>) {
+        this.myBoard = value;
+    }
 
     /**
      * Setter enemyBoard
      * @param {Map<string, number> } value
      */
-	public setEnemyBoard(value: Map<string, number> ) {
-		this.enemyBoard = value;
-	}
+    public setEnemyBoard(value: Map<string, number>) {
+        this.enemyBoard = value;
+    }
 
     /**
      * Setter huntShotQueue
      * @param {Queue<Coordinate> } value
      */
-	public setHuntShotQueue(value: Queue<Coordinate> ) {
-		this.huntShotQueue = value;
-	}
+    public setHuntShotQueue(value: Queue<Coordinate>) {
+        this.huntShotQueue = value;
+    }
 
     /**
-     * Setter setShipCoordinateArea
+     * Setter setShipCoordinatesInCurrentTargetArea
      * @param {Array<Coordinate> } value
      */
-	public setShipCoordinateArea(value: Array<Coordinate> ) {
-		this.shipCoordinateArea = value;
-	}
+    public setShipCoordinatesInCurrentTargetArea(value: Array<Coordinate>) {
+        this.shipCoordinatesInCurrentTargetArea = value;
+    }
 
     /**
      * Getter shipsInMyBoard
      * @return {MyShipsDto }
      */
-	public getShipsInMyBoard(): MyShipsDto  {
-		return this.shipsInMyBoard;
-	}
+    public getShipsInMyBoard(): MyShipsDto {
+        return this.shipsInMyBoard;
+    }
 
     /**
      * Setter shipsInMyBoard
      * @param {MyShipsDto } value
      */
-	public setShipsInMyBoard(value: MyShipsDto ) {
-		this.shipsInMyBoard = value;
-	}
+    public setShipsInMyBoard(value: MyShipsDto) {
+        this.shipsInMyBoard = value;
+    }
 
     /**
      * Getter targetShotQueue
      * @return {Queue<Coordinate> }
      */
-	public getTargetShotQueue(): Queue<Coordinate>  {
-		return this.targetShotQueue;
-	}
+    public getTargetShotQueue(): Queue<Coordinate> {
+        return this.targetShotQueue;
+    }
 
     /**
      * Setter targetShotQueue
      * @param {Queue<Coordinate> } value
      */
-	public setTargetShotQueue(value: Queue<Coordinate> ) {
-		this.targetShotQueue = value;
-	}
+    public setTargetShotQueue(value: Queue<Coordinate>) {
+        this.targetShotQueue = value;
+    }
 
 }

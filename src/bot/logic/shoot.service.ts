@@ -30,17 +30,26 @@ export class ShootService {
       return
     }
     const enemyBoard = game.getEnemyBoard()
+    const shipCoordinatesInCurrentTargetArea = game.getShipCoordinatesInCurrentTargetArea()
+    const targetShotQueue = game.getTargetShotQueue()
+
     notifyDto.shots.forEach(shot => {
       const key_coordinate = '' + shot.coordinate[0] + shot.coordinate[1]
       if (shot.status == STATUS_SHOT.HIT) {
         enemyBoard.set(key_coordinate, COORDINATE_STATUS.SHIP)
+        const newCoordinate = new Coordinate(shot.coordinate[0], shot.coordinate[1])
+        shipCoordinatesInCurrentTargetArea.push(newCoordinate)
+        const coordinatesAvailableAround = this.findCoorinatesAvailableAround(newCoordinate, game)
+        coordinatesAvailableAround.forEach(e => {
+          targetShotQueue.push(e)
+        })
       }
       if (shot.status == STATUS_SHOT.MISS) {
         enemyBoard.set(key_coordinate, COORDINATE_STATUS.SHOT)
       }
     });
     notifyDto.sunkShips.forEach(sunkShip => {
-      sunkShip.coordinates.forEach(coordinate=>{
+      sunkShip.coordinates.forEach(coordinate => {
         const key_coordinate = '' + coordinate[0] + coordinate[1]
         enemyBoard.set(key_coordinate, COORDINATE_STATUS.SUNK)
       })
@@ -60,7 +69,7 @@ export class ShootService {
     let down = null;
     let right = null;
     let left = null;
-    const result = new Array()
+    const result = []
     if (coordinate.y < game.getBoardHeight() - 1) {
       const new_y = coordinate.y + 1;
       if (board.get('' + coordinate.x + new_y) === COORDINATE_STATUS.WATER) {
