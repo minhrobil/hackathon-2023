@@ -24,8 +24,8 @@ export class Game {
     //Phan thong tin ke dich
     private enemyBoard: Map<string, number> = new Map(); //Bản đồ quân địch
     private huntShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi hunting theo chiến dịch ban dau
-    private shipCoordinateQueue: Queue<Coordinate> = new Queue()//Queue toa do da ban trung tau trong lan target hien tai
-
+    private shipCoordinateArea: Array<Coordinate> = new Array()//Danh sach cac toa do tau trong vung target hien tai
+    private targetShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi target trong vung hien tai
     /**
      * Getter currentMission
      * @return {number }
@@ -148,11 +148,11 @@ export class Game {
 	}
 
     /**
-     * Getter shipCoordinateQueue
-     * @return {Queue<Coordinate> }
+     * Getter getShipCoordinateArea
+     * @return {Array<Coordinate> }
      */
-	public getShipCoordinateQueue(): Queue<Coordinate>  {
-		return this.shipCoordinateQueue;
+	public getShipCoordinateArea(): Array<Coordinate>  {
+		return this.shipCoordinateArea;
 	}
 
     /**
@@ -196,11 +196,11 @@ export class Game {
 	}
 
     /**
-     * Setter shipCoordinateQueue
-     * @param {Queue<Coordinate> } value
+     * Setter setShipCoordinateArea
+     * @param {Array<Coordinate> } value
      */
-	public setShipCoordinateQueue(value: Queue<Coordinate> ) {
-		this.shipCoordinateQueue = value;
+	public setShipCoordinateArea(value: Array<Coordinate> ) {
+		this.shipCoordinateArea = value;
 	}
 
     /**
@@ -218,4 +218,21 @@ export class Game {
 	public setShipsInMyBoard(value: MyShipsDto ) {
 		this.shipsInMyBoard = value;
 	}
+
+    /**
+     * Getter targetShotQueue
+     * @return {Queue<Coordinate> }
+     */
+	public getTargetShotQueue(): Queue<Coordinate>  {
+		return this.targetShotQueue;
+	}
+
+    /**
+     * Setter targetShotQueue
+     * @param {Queue<Coordinate> } value
+     */
+	public setTargetShotQueue(value: Queue<Coordinate> ) {
+		this.targetShotQueue = value;
+	}
+
 }

@@ -4,6 +4,7 @@ import { ShipDto } from '../dto/invite.dto';
 import { Coordinate } from '../entities/coordinate.entity';
 import { Queue } from './queue.service';
 import { MyShipsDto } from '../dto/myShips.dto';
+import { COORDINATE_TIGER_TATIC } from '../constant/coordinate.tiger.tatic';
 
 @Injectable()
 export class PlaceShipService {
@@ -14,10 +15,7 @@ export class PlaceShipService {
         enemyBoard.set('' + x + y, COORDINATE_STATUS.WATER)
       }
     }
-    myBoard.set('34', COORDINATE_STATUS.SHOT)
-    myBoard.set('56', COORDINATE_STATUS.SHIP)
-    myBoard.set('62', COORDINATE_STATUS.SUNK)
-
+ 
     this.printBoard(myBoard, boardWidth, boardHeight)
   }
 
@@ -40,12 +38,11 @@ export class PlaceShipService {
     });
   }
 
-  initHuntShotQueue(huntShotQueue: Queue<Coordinate>, boardWidth: number, boardHeight: number, currentTactic: number) {
-    const boardSize: number = boardHeight * boardWidth
+  initHuntShotQueue(huntShotQueue: Queue<Coordinate>, currentTactic: number) {
     if (currentTactic === TACTIC.TIGER) {
-      huntShotQueue.push(new Coordinate(0,0))
-      huntShotQueue.push(new Coordinate(0,1))
-      huntShotQueue.push(new Coordinate(0,2))
+      COORDINATE_TIGER_TATIC.forEach(coordinate => {
+        huntShotQueue.push(new Coordinate(coordinate.x,coordinate.y))
+      });
     }
   }
 

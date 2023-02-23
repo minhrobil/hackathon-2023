@@ -8,7 +8,7 @@ enum StatusShot {
 }
 
 
-class Shot {
+export class Shot {
   @IsArray()
   readonly coordinate: number[];
 
@@ -16,7 +16,7 @@ class Shot {
   readonly status: string;
 }
   
-class SunkShip {
+export class SunkShip {
   @IsArray()
   readonly coordinates: number[][];
 

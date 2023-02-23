@@ -27,13 +27,7 @@ export class BotService {
     game.setBoardHeight(inviteDto.boardHeight)
 
     this.placeShipService.initBoard(game.getMyBoard(), game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
-    this.placeShipService.initHuntShotQueue(game.getHuntShotQueue(), game.getBoardWidth(), game.getBoardHeight(), game.getCurrentTactic())
-    console.log(game.getHuntShotQueue().size());
-    console.log(game.getHuntShotQueue().pop());
-    console.log(game.getHuntShotQueue().size());
-    console.log(game.getHuntShotQueue().peek());
-    console.log(game.getHuntShotQueue().size());
-
+    this.placeShipService.initHuntShotQueue(game.getHuntShotQueue(), game.getCurrentTactic())
     const shipsInGame = inviteDto.ships
     this.placeShipService.placeShip(game.getShipsInMyBoard(), shipsInGame, game.getMyBoard())
     this.games.set(session, game);
@@ -57,14 +51,18 @@ export class BotService {
     if(!game){
       return { success: false }
     }
-
+    let coordinates = [[0,0]]
+    game.setCurrentMission(MISSION_TYPE.TARGETING)
     if (game.getCurrentMission() === MISSION_TYPE.HUNTING) {
-      return this.shootService.huntShip(shootDto, game.getEnemyBoard(), game.getHuntShotQueue());
+      coordinates.pop()
+      coordinates = [...this.shootService.huntShip(shootDto, game)];
     }
     if (game.getCurrentMission() === MISSION_TYPE.TARGETING) {
-      return this.shootService.huntShip(shootDto, game.getEnemyBoard(), game.getHuntShotQueue());
+      coordinates.pop()
+
+      coordinates = [...this.shootService.targetShip(shootDto, game)];
     }
-    return { success: true };
+    return { coordinates };
   }
 
   notify(notifyDto: NotifyDto, session: string) {
@@ -72,7 +70,8 @@ export class BotService {
     if(!game){
       return { success: false }
     }
-
+    this.shootService.updateShotResult(notifyDto, game)
+    this.placeShipService.printBoard(game.getEnemyBoard(),game.getBoardWidth(),game.getBoardHeight())
     return { success: true };
   }
 
