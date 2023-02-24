@@ -5,6 +5,7 @@ import { Coordinate } from '../entities/coordinate.entity';
 import { Queue } from './queue.service';
 import { MyShipsDto } from '../dto/myShips.dto';
 import { COORDINATE_TIGER_TATIC } from '../constant/coordinate.tiger.tatic';
+import { Game } from './game.service';
 
 @Injectable()
 export class PlaceShipService {
@@ -15,8 +16,11 @@ export class PlaceShipService {
         enemyBoard.set('' + x + y, COORDINATE_STATUS.WATER)
       }
     }
+    enemyBoard.set('175', COORDINATE_STATUS.SHIP)
+    enemyBoard.set('185', COORDINATE_STATUS.SHIP)
+    enemyBoard.set('186', COORDINATE_STATUS.SHIP)
+    enemyBoard.set('187', COORDINATE_STATUS.SHIP)
 
-    this.printBoard(myBoard, boardWidth, boardHeight)
   }
 
   getShipLocation(shipType: string, board: Map<string, number>) {
@@ -28,14 +32,16 @@ export class PlaceShipService {
     }
   }
 
-  placeShip(shipsInMyBoard: MyShipsDto, shipsInGame: ShipDto[], board: Map<string, number>) {
-    console.log(shipsInMyBoard);
-
-    shipsInGame.forEach(shipType => {
-      for (let ship = 0; ship < shipType.quantity; ship++) {
-        shipsInMyBoard.ships.push(this.getShipLocation(shipType.type, board))
-      }
-    });
+  placeShip(game: Game, myShips: MyShipsDto) {
+    const myBoard = game.getMyBoard()
+    game.setShipsInMyBoard(myShips)
+    myShips.ships.forEach(ship=>{
+      ship.coordinates.forEach(coordinate=>{
+        myBoard.set(''+coordinate['x']+coordinate['y'], COORDINATE_STATUS.SHIP)
+      })
+      
+    })
+    this.printBoard(myBoard, game.getBoardWidth(),game.getBoardHeight())
   }
 
   initHuntShotQueue(huntShotQueue: Queue<Coordinate>, currentTactic: number) {

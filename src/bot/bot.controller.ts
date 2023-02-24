@@ -20,9 +20,9 @@ export class BotController {
 
   @Post("/invite")
   @UseInterceptors(HeaderInterceptor)
-  create(@Body() inviteDto: InviteDto,@Headers() headers: HeaderDto, @Res() res: Response) {
+  async invite(@Body() inviteDto: InviteDto,@Headers() headers: HeaderDto, @Res() res: Response){
     const session: string = headers['x-session-id'] 
-    const data = this.botService.invite(inviteDto, session)
+    const data = await this.botService.invite(inviteDto, session)
     return res.json(data) 
   }
 

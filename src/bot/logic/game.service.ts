@@ -26,10 +26,12 @@ export class Game {
     private huntShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi hunting theo chiến dịch ban dau
     private shipCoordinatesInCurrentTargetArea: Array<Coordinate> = new Array()//Danh sach cac toa do tau trong vung target hien tai
     private targetShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi target trong vung hien tai
+    private shipsInEnermyBoard: MyShipsDto = new MyShipsDto()
     /**
      * Getter currentMission
      * @return {number }
      */
+
     public getCurrentMission(): number {
         return this.currentMission;
     }
@@ -235,4 +237,20 @@ export class Game {
         this.targetShotQueue = value;
     }
 
+
+    /**
+     * Getter shipsInEnermyBoard
+     * @return {MyShipsDto }
+     */
+	public getShipsInEnermyBoard(): MyShipsDto  {
+		return this.shipsInEnermyBoard;
+	}
+
+    /**
+     * Setter shipsInEnermyBoard
+     * @param {MyShipsDto } value
+     */
+	public setShipsInEnermyBoard(value: MyShipsDto ) {
+		this.shipsInEnermyBoard = value;
+	}
 }

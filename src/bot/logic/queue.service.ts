@@ -4,6 +4,7 @@ interface IQueue<T> {
     pop(): T | undefined;
     size(): number;
     peek(): T | undefined;
+    clear(): void;
 }
 export class Queue<T> implements IQueue<T> {
     private storage: T[] = [];
@@ -31,5 +32,8 @@ export class Queue<T> implements IQueue<T> {
     }
     size(): number {
         return this.storage.length;
+    }
+    clear() {
+        this.storage.length = 0
     }
 }
