@@ -3,7 +3,7 @@ import { ShootDto } from '../dto/shoot.dto';
 import { Coordinate } from '../entities/coordinate.entity';
 import { Queue } from './queue.service';
 import { Game } from './game.service';
-import { COORDINATE_STATUS, FOUR_SHAPE_AREA_TYPE, MISSION_TYPE, MULTIPLE_SHAPE_AREA_TYPE, MY_PLAYER_ID, SHIP_FINDING_STATUS, STATUS_SHOT, THREE_SHAPE_AREA_TYPE, TWO_SHAPE_AREA_TYPE } from '../constant/constant';
+import { COORDINATE_STATUS, FOUR_SHAPE_AREA_TYPE, MISSION_TYPE, MULTIPLE_SHAPE_AREA_TYPE, MY_PLAYER_ID, SHIP_FINDING_STATUS, SHIP_TYPE, STATUS_SHOT, THREE_SHAPE_AREA_TYPE, TWO_SHAPE_AREA_TYPE } from '../constant/constant';
 import { NotifyDto } from '../dto/notify.dto';
 import { MyShipsDto } from '../dto/myShips.dto';
 
@@ -125,9 +125,10 @@ export class ShootService {
   buildTargetShotQueueForArea(game: Game) {
     const shipCoordinatesInCurrentTargetArea = game.getShipCoordinatesInCurrentTargetArea()
     const targetShotQueue = game.getTargetShotQueue()
+    targetShotQueue.clear()
     let checked = new Set()
-    const shapeArea = this.getShapeArea(shipCoordinatesInCurrentTargetArea)
-    console.log("shapeArea",shapeArea);
+    // const recommendCoordinate = this.getRecommendCoordinate(game)
+    
     
     shipCoordinatesInCurrentTargetArea.forEach(ship => {
       const availableAround = this.findCoorinatesAvailableAround(ship, game)
@@ -250,18 +251,45 @@ export class ShootService {
     }
     return false
   }
-  getShapeArea(coordinates: Coordinate[]){
-    console.log(coordinates);
-    
+  getShapeAreaAndRecommend(game: Game){
+    const coordinates = game.getShipCoordinatesInCurrentTargetArea()
     const length = coordinates.length
+    const result = {
+      shapeArea: MULTIPLE_SHAPE_AREA_TYPE,
+      recommends: []
+    }
     if(length == 2){
-      let first = coordinates[0]
-      let second = coordinates[1]
-      if(first.y == second.y){
-        return TWO_SHAPE_AREA_TYPE.TWO_1
+      let highest = 0
+      let lowest = 7
+      let rightest = 0
+      let leftest = 19
+      let numOfHighest = 0
+      let numOfLowest = 0
+      let numOfRightest = 0
+      let numOfLeftest = 0
+      coordinates.forEach(element => {
+        if(highest < element.y) highest = element.y
+        if(lowest > element.y) lowest = element.y
+        if(rightest < element.x) rightest = element.x
+        if(leftest > element.x) leftest = element.x
+      });
+      coordinates.forEach(element => {
+        if(highest == element.y) numOfHighest++
+        if(lowest == element.y) numOfLowest++
+        if(rightest == element.x) numOfRightest++
+        if(leftest == element.x) numOfLeftest++
+      });
+      if(numOfHighest == 2 && numOfLowest == 2){
+        result.shapeArea = TWO_SHAPE_AREA_TYPE.TWO_1
+        result.recommends.push(new Coordinate(rightest+1, highest))
+        result.recommends.push(new Coordinate(leftest-1, highest))
+        result.recommends.push(new Coordinate(leftest-1, highest))
+        result.recommends.push(new Coordinate(leftest-1, highest))
+        result.recommends.push(new Coordinate(leftest-1, highest))
+        result.recommends.push(new Coordinate(leftest-1, highest))
       } 
-      if(first.x == second.x){
-        return TWO_SHAPE_AREA_TYPE.TWO_2
+      if(numOfRightest == 2 && numOfLeftest == 2){
+        result.shapeArea = TWO_SHAPE_AREA_TYPE.TWO_2
       } 
     }
     if(length == 3){
@@ -285,33 +313,23 @@ export class ShootService {
         if(rightest == element.x) numOfRightest++
         if(leftest == element.x) numOfLeftest++
       });
-      console.log("highest",highest);
-      console.log("lowest",lowest);
-      console.log("rightest",rightest);
-      console.log("leftest",leftest);
-
-      console.log("numOfHighest",numOfHighest);
-      console.log("numOfLowest",numOfLowest);
-      console.log("numOfRightest",numOfRightest);
-      console.log("numOfLeftest",numOfLeftest);
-
       if(numOfHighest == 3 && numOfLowest == 3){
-        return THREE_SHAPE_AREA_TYPE.THREE_1
+        result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_1
       } 
       if(numOfRightest == 3 && numOfLeftest == 3){
-        return THREE_SHAPE_AREA_TYPE.THREE_2
+        result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_2
       } 
       if(numOfHighest == 2 && numOfLowest == 1 && numOfRightest == 1 && numOfLeftest == 2){
-        return THREE_SHAPE_AREA_TYPE.THREE_3
+        result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_3
       } 
       if(numOfHighest == 2 && numOfLowest == 1 && numOfRightest == 2 && numOfLeftest == 1){
-        return THREE_SHAPE_AREA_TYPE.THREE_4
+        result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_4
       } 
       if(numOfHighest == 1 && numOfLowest == 2 && numOfRightest == 1 && numOfLeftest == 2){
-        return THREE_SHAPE_AREA_TYPE.THREE_5
+        result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_5
       } 
       if(numOfHighest == 1 && numOfLowest == 2 && numOfRightest == 2 && numOfLeftest == 1){
-        return THREE_SHAPE_AREA_TYPE.THREE_6
+        result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_6
       } 
     }
     if(length == 4){
@@ -335,29 +353,94 @@ export class ShootService {
         if(rightest == element.x) numOfRightest++
         if(leftest == element.x) numOfLeftest++
       });
-      console.log("highest",highest);
-      console.log("lowest",lowest);
-      console.log("rightest",rightest);
-      console.log("leftest",leftest);
-
-      console.log("numOfHighest",numOfHighest);
-      console.log("numOfLowest",numOfLowest);
-      console.log("numOfRightest",numOfRightest);
-      console.log("numOfLeftest",numOfLeftest);
-
       if(numOfHighest == 1 && numOfLowest == 2 && numOfLeftest == 1 && numOfRightest == 3){
-        return FOUR_SHAPE_AREA_TYPE.FOUR_1
+        result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_1
       } 
       if(numOfHighest == 1 && numOfLowest == 1 && numOfLeftest == 1 && numOfRightest == 3){
-        return FOUR_SHAPE_AREA_TYPE.FOUR_2
+        result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_2
       } 
       if(numOfHighest == 3 && numOfLowest == 1 && numOfLeftest == 2 && numOfRightest == 1){
-        return FOUR_SHAPE_AREA_TYPE.FOUR_3
+        result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_3
       } 
       if(numOfHighest == 3 && numOfLowest == 1 && numOfLeftest == 1 && numOfRightest == 1){
-        return FOUR_SHAPE_AREA_TYPE.FOUR_4
+        result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_4
       } 
     }
-    return MULTIPLE_SHAPE_AREA_TYPE
+    return result
+  }
+  getRecommendCoordinate(game: Game): Coordinate | null {
+    // const { shapeArea, recommends } = this.getShapeAreaAndRecommend(game)
+
+    // console.log("shapeArea",shapeArea);
+    // if(shapeArea == TWO_SHAPE_AREA_TYPE.TWO_1){
+      
+    // }
+    return
+  }
+  isRemainDD(game: Game): boolean{
+    const shipsInEnermyBoard = game.getShipsInEnermyBoard()
+    const index = shipsInEnermyBoard.ships.findIndex((ship) => {
+      if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.DD) {
+        return true
+      } 
+    })
+    return index >= 0
+  }
+  isRemainCA(game: Game): boolean{
+    const shipsInEnermyBoard = game.getShipsInEnermyBoard()
+    const index = shipsInEnermyBoard.ships.findIndex((ship) => {
+      if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.CA) {
+        return true
+      } 
+    })
+    return index >= 0
+  }
+  isRemainOR(game: Game): boolean{
+    const shipsInEnermyBoard = game.getShipsInEnermyBoard()
+    const index = shipsInEnermyBoard.ships.findIndex((ship) => {
+      if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.OR) {
+        return true
+      } 
+    })
+    return index >= 0
+  }
+  isRemainBB(game: Game): boolean{
+    const shipsInEnermyBoard = game.getShipsInEnermyBoard()
+    const index = shipsInEnermyBoard.ships.findIndex((ship) => {
+      if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.BB) {
+        return true
+      } 
+    })
+    return index >= 0
+  }
+  isRemainCV(game: Game): boolean{
+    const shipsInEnermyBoard = game.getShipsInEnermyBoard()
+    const index = shipsInEnermyBoard.ships.findIndex((ship) => {
+      if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.CV) {
+        return true
+      } 
+    })
+    return index >= 0
+  }
+  isNeedThree12(game: Game): boolean {
+    const isRemainCA = this.isRemainCA(game)
+    const isRemainBB = this.isRemainBB(game)
+    const isRemainOR = this.isRemainOR(game)
+    const isRemainCV = this.isRemainCV(game)
+    return isRemainCA || isRemainBB || isRemainOR || isRemainCV
+  }
+  isNeedThree3456(game: Game): boolean {
+    const isRemainCA = this.isRemainCA(game)
+    const isRemainBB = this.isRemainBB(game)
+    const isRemainOR = this.isRemainOR(game)
+    const isRemainCV = this.isRemainCV(game)
+    return isRemainBB || isRemainOR || isRemainCV
+  }
+  isNeedFour(game: Game): boolean {
+    const isRemainCA = this.isRemainCA(game)
+    const isRemainBB = this.isRemainBB(game)
+    const isRemainOR = this.isRemainOR(game)
+    const isRemainCV = this.isRemainCV(game)
+    return isRemainBB || isRemainOR || isRemainCV
   }
 }

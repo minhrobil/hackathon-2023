@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Headers, Res, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers, Res, UseInterceptors, HttpStatus, HttpCode } from '@nestjs/common';
 import { BotService } from './bot.service';
 import { InviteDto } from './dto/invite.dto';
 import { PlaceShipDto } from './dto/place-ship.dto';
@@ -19,23 +19,35 @@ export class BotController {
   }
 
   @Post("/invite")
-  @UseInterceptors(HeaderInterceptor)
+  // @UseInterceptors(HeaderInterceptor)
+  @HttpCode(200)
   async invite(@Body() inviteDto: InviteDto,@Headers() headers: HeaderDto, @Res() res: Response){
     const session: string = headers['x-session-id'] 
-    const data = await this.botService.invite(inviteDto, session)
-    return res.json(data) 
+    const token: string = headers['x-token'] 
+    res.setHeader('x-session-id', session)
+    res.setHeader('x-token', token)
+
+    // const data = await this.botService.invite(inviteDto, session)
+    console.log("invite", res.json());
+    return res.json("data") 
+    // console.log("minh");
+    
+    // return res.json({}) 
   }
 
   @Post("/place-ships")
   @UseInterceptors(HeaderInterceptor)
+  @HttpCode(200)
   placeShips(@Body() placeShipDto: PlaceShipDto,@Headers() headers: HeaderDto, @Res() res: Response) {
     const session: string = headers['x-session-id'] 
     const data = this.botService.placeShips(placeShipDto, session);
+    // console.log("place-ships", res.json(data) );
     return res.json(data) 
   }
 
   @Post("/shoot")
   @UseInterceptors(HeaderInterceptor)
+  @HttpCode(200)
   shoot(@Body() shootDto: ShootDto,@Headers() headers: HeaderDto, @Res() res: Response) {
     const session: string = headers['x-session-id']
     const data = this.botService.shoot(shootDto, session);
@@ -44,6 +56,7 @@ export class BotController {
 
   @Post("/notify")
   @UseInterceptors(HeaderInterceptor)
+  @HttpCode(200)
   notify(@Body() notifyDto: NotifyDto,@Headers() headers: HeaderDto, @Res() res: Response) {
     const session: string = headers['x-session-id']
     const data = this.botService.notify(notifyDto, session);
@@ -52,6 +65,7 @@ export class BotController {
 
   @Post("/game-over")
   @UseInterceptors(HeaderInterceptor)
+  @HttpCode(200)
   gameOver(@Body() gameOverDto: GameOverDto,@Headers() headers: HeaderDto, @Res() res: Response) {
     const session: string = headers['x-session-id']
     const data = this.botService.gameOver(gameOverDto, session);

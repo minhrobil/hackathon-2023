@@ -48,4 +48,12 @@ export const FOUR_SHAPE_AREA_TYPE = {
 
 export const MULTIPLE_SHAPE_AREA_TYPE = "MULTIPLE_SHAPE_AREA_TYPE"
 
+export const SHIP_TYPE = {
+    CV: "CV",
+    BB: "BB",
+    OR: "OR",
+    CA: "CA",
+    DD: "DD"
+}
+
 export const MY_PLAYER_ID = "BAOTHU"

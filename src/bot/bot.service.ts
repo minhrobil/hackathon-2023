@@ -29,9 +29,9 @@ export class BotService {
 
     this.placeShipService.initBoard(game.getMyBoard(), game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
     this.placeShipService.initHuntShotQueue(game.getHuntShotQueue(), game.getCurrentTactic())
-    this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
+    // this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
 
-    this.shootService.findNewTargetAreaInMap(game)
+    // this.shootService.findNewTargetAreaInMap(game)
     const enermyShips: MyShipsDto = { ships: [] }
     inviteDto.ships.forEach(ship => {
       for (let i = 1; i <= ship.quantity; i++) {
@@ -43,26 +43,25 @@ export class BotService {
       }
     });
     game.setShipsInEnermyBoard(enermyShips)
-    console.log(enermyShips);
+    // console.log(enermyShips);
 
-    const shipsInGame = inviteDto.ships
     let myShips: MyShipsDto = null
-    // try {
-    //   let response = await fetch('http://10.10.2.187:1998/api/place-ship', {
-    //     method: 'POST',
-    //     body: JSON.stringify(inviteDto), // string or object
-    //     headers: {
-    //       'Content-Type': 'application/json'
-    //     }
-    //   });
-    //   // console.log(response);
+    try {
+      let response = await fetch('http://10.10.2.187:1998/api/place-ship', {
+        method: 'POST',
+        body: JSON.stringify(inviteDto), // string or object
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      // console.log(response);
 
-    //   if (response.ok) {
-    //     myShips = await response.json()
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
+      if (response.ok) {
+        myShips = await response.json()
+      }
+    } catch (error) {
+      // console.log(error);
+    }
     if (myShips) {
       this.placeShipService.placeShip(game, myShips)
     }
@@ -80,7 +79,16 @@ export class BotService {
     game.setPlayer2(placeShipDto.player2)
 
     const ships = game.getShipsInMyBoard()
-    return ships
+
+    return {
+      ships: ships.ships.map((ship => {
+        return {
+          type: ship.type,
+          coordinates: ship.coordinates.map(coordinate => [coordinate['x'], coordinate['y']])
+        }
+
+      }))
+    }
   }
 
   shoot(shootDto: ShootDto, session: string) {

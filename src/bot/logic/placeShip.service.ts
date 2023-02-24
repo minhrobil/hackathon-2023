@@ -16,10 +16,10 @@ export class PlaceShipService {
         enemyBoard.set('' + x + y, COORDINATE_STATUS.WATER)
       }
     }
-    enemyBoard.set('175', COORDINATE_STATUS.SHIP)
-    enemyBoard.set('185', COORDINATE_STATUS.SHIP)
-    enemyBoard.set('186', COORDINATE_STATUS.SHIP)
-    enemyBoard.set('187', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('175', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('185', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('195', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('196', COORDINATE_STATUS.SHIP)
 
   }
 
