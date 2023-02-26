@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { COORDINATE_STATUS, TACTIC } from '../constant/constant';
-import { ShipDto } from '../dto/invite.dto';
 import { Coordinate } from '../entities/coordinate.entity';
 import { Queue } from './queue.service';
 import { MyShipsDto } from '../dto/myShips.dto';
@@ -16,10 +15,51 @@ export class PlaceShipService {
         enemyBoard.set('' + x + y, COORDINATE_STATUS.WATER)
       }
     }
-    // enemyBoard.set('175', COORDINATE_STATUS.SHIP)
-    // enemyBoard.set('185', COORDINATE_STATUS.SHIP)
-    // enemyBoard.set('195', COORDINATE_STATUS.SHIP)
-    // enemyBoard.set('196', COORDINATE_STATUS.SHIP)
+    // two1 
+    // enemyBoard.set('164', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('174', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('184', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('194', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('00', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('10', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('07', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('17', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('187', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('197', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('180', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('190', COORDINATE_STATUS.SHIP)
+    // two2
+    // enemyBoard.set('00', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('01', COORDINATE_STATUS.SHIP)
+    // three1
+    // enemyBoard.set('00', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('10', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('20', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('11', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('21', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('31', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('41', COORDINATE_STATUS.SHOT)
+    // enemyBoard.set('01', COORDINATE_STATUS.SHOT)
+    // three2
+    // enemyBoard.set('11', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('12', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('13', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('10', COORDINATE_STATUS.SHOT)
+    // enemyBoard.set('02', COORDINATE_STATUS.SHOT)
+
+    // three3
+    // three4
+    // three5
+    // three6
+    // four1
+    // four2
+    // four3
+    // four4
+    // four5
+    // four6
+
+    // enemyBoard.set('166', COORDINATE_STATUS.SHIP)
+    // enemyBoard.set('168', COORDINATE_STATUS.SHIP)
 
   }
 
@@ -35,13 +75,13 @@ export class PlaceShipService {
   placeShip(game: Game, myShips: MyShipsDto) {
     const myBoard = game.getMyBoard()
     game.setShipsInMyBoard(myShips)
-    myShips.ships.forEach(ship=>{
-      ship.coordinates.forEach(coordinate=>{
-        myBoard.set(''+coordinate['x']+coordinate['y'], COORDINATE_STATUS.SHIP)
+    myShips.ships.forEach(ship => {
+      ship.coordinates.forEach(coordinate => {
+        myBoard.set('' + coordinate['x'] + coordinate['y'], COORDINATE_STATUS.SHIP)
       })
-      
+
     })
-    this.printBoard(myBoard, game.getBoardWidth(),game.getBoardHeight())
+    this.printBoard(myBoard, game.getBoardWidth(), game.getBoardHeight())
   }
 
   initHuntShotQueue(huntShotQueue: Queue<Coordinate>, currentTactic: number) {

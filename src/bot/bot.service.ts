@@ -9,6 +9,7 @@ import { ShootService } from './logic/shoot.service';
 import { MISSION_TYPE, SHIP_FINDING_STATUS } from './constant/constant';
 import { Game } from './logic/game.service';
 import { MyShipsDto } from './dto/myShips.dto';
+import axios, { AxiosResponse } from 'axios'
 @Injectable()
 export class BotService {
   constructor(
@@ -17,8 +18,17 @@ export class BotService {
   ) { }
 
   private games: Map<string, Game> = new Map()
-
-
+  async getShipsPlaceJava(inviteDto: InviteDto): Promise<AxiosResponse> {
+    try {
+      return await axios.post(process.env.URI_PLACE_SHIP, inviteDto, {
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+    } catch (error) {
+      console.log("getShipsPlaceJava", error);
+    }
+  }
   async invite(inviteDto: InviteDto, session: string) {
     if (this.games.has(session)) {
       return { success: false }
@@ -29,9 +39,6 @@ export class BotService {
 
     this.placeShipService.initBoard(game.getMyBoard(), game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
     this.placeShipService.initHuntShotQueue(game.getHuntShotQueue(), game.getCurrentTactic())
-    // this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
-
-    // this.shootService.findNewTargetAreaInMap(game)
     const enermyShips: MyShipsDto = { ships: [] }
     inviteDto.ships.forEach(ship => {
       for (let i = 1; i <= ship.quantity; i++) {
@@ -43,28 +50,15 @@ export class BotService {
       }
     });
     game.setShipsInEnermyBoard(enermyShips)
-    // console.log(enermyShips);
-
-    let myShips: MyShipsDto = null
-    try {
-      let response = await fetch('http://10.10.2.187:1998/api/place-ship', {
-        method: 'POST',
-        body: JSON.stringify(inviteDto), // string or object
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      // console.log(response);
-
-      if (response.ok) {
-        myShips = await response.json()
+    const res = await this.getShipsPlaceJava(inviteDto);
+    if (res) {
+      const myShips: MyShipsDto = res?.data
+      if (myShips) {
+        this.placeShipService.placeShip(game, myShips)
       }
-    } catch (error) {
-      // console.log(error);
     }
-    if (myShips) {
-      this.placeShipService.placeShip(game, myShips)
-    }
+    this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
+    console.log("EnermyBoard", game.getShipsInEnermyBoard());
     this.games.set(session, game);
     return { success: true };
   }
@@ -86,25 +80,33 @@ export class BotService {
           type: ship.type,
           coordinates: ship.coordinates.map(coordinate => [coordinate['x'], coordinate['y']])
         }
-
       }))
     }
   }
 
   shoot(shootDto: ShootDto, session: string) {
+    console.log("Next shoot!!!");
     const game = this.games.get(session);
     if (!game) {
       return { success: false }
     }
-    let coordinates = [[0, 0]]
-    if (game.getCurrentMission() === MISSION_TYPE.HUNTING) {
-      coordinates.pop()
-      coordinates = [...this.shootService.huntShip(shootDto, game)];
-    }
+    this.shootService.updateCurrentMission(game)
+    let coordinates = []
     if (game.getCurrentMission() === MISSION_TYPE.TARGETING) {
-      coordinates.pop()
-
-      coordinates = [...this.shootService.targetShip(shootDto, game)];
+      const shootTarget = this.shootService.targetShip(shootDto, game)
+      if (shootTarget.length == 0) {
+        game.setCurrentMission(MISSION_TYPE.HUNTING)
+      } else {
+        coordinates = shootTarget
+      }
+    }
+    if (game.getCurrentMission() === MISSION_TYPE.HUNTING) {
+      const shootHunt = this.shootService.huntShip(shootDto, game)
+      if (shootHunt.length == 0) {
+        coordinates = [[0, 0]]
+      } else {
+        coordinates = shootHunt
+      }
     }
     this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
     return { coordinates };

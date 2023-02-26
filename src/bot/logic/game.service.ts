@@ -1,5 +1,4 @@
 import { MISSION_TYPE, TACTIC } from "../constant/constant";
-import { ShipDto } from "../dto/invite.dto";
 import { MyShipsDto } from "../dto/myShips.dto";
 import { Coordinate } from "../entities/coordinate.entity";
 import { Queue } from "./queue.service";
@@ -10,21 +9,21 @@ export class Game {
     }
 
     //Thong tin game
-    private session: string = '';
+    private session = '';
 
     //Thong tin quan ta
     private currentTactic: number = TACTIC.TIGER //Chien dich 
-    private boardWidth: number = 0
-    private boardHeight: number = 0
-    private player1: string = ''
-    private player2: string = ''
+    private boardWidth = 0
+    private boardHeight = 0
+    private player1 = ''
+    private player2 = ''
     private currentMission: number = MISSION_TYPE.HUNTING; //Mission hiện tại
     private myBoard: Map<string, number> = new Map()//Bản đồ quân ta
     private shipsInMyBoard: MyShipsDto = new MyShipsDto()
     //Phan thong tin ke dich
     private enemyBoard: Map<string, number> = new Map(); //Bản đồ quân địch
     private huntShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi hunting theo chiến dịch ban dau
-    private shipCoordinatesInCurrentTargetArea: Array<Coordinate> = new Array()//Danh sach cac toa do tau trong vung target hien tai
+    private shipCoordinatesInCurrentTargetArea: Array<Coordinate> = []//Danh sach cac toa do tau trong vung target hien tai
     private targetShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi target trong vung hien tai
     private shipsInEnermyBoard: MyShipsDto = new MyShipsDto()
     /**
@@ -242,15 +241,15 @@ export class Game {
      * Getter shipsInEnermyBoard
      * @return {MyShipsDto }
      */
-	public getShipsInEnermyBoard(): MyShipsDto  {
-		return this.shipsInEnermyBoard;
-	}
+    public getShipsInEnermyBoard(): MyShipsDto {
+        return this.shipsInEnermyBoard;
+    }
 
     /**
      * Setter shipsInEnermyBoard
      * @param {MyShipsDto } value
      */
-	public setShipsInEnermyBoard(value: MyShipsDto ) {
-		this.shipsInEnermyBoard = value;
-	}
+    public setShipsInEnermyBoard(value: MyShipsDto) {
+        this.shipsInEnermyBoard = value;
+    }
 }

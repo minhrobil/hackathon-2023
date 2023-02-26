@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ShootDto } from '../dto/shoot.dto';
 import { Coordinate } from '../entities/coordinate.entity';
-import { Queue } from './queue.service';
 import { Game } from './game.service';
-import { COORDINATE_STATUS, FOUR_SHAPE_AREA_TYPE, MISSION_TYPE, MULTIPLE_SHAPE_AREA_TYPE, MY_PLAYER_ID, SHIP_FINDING_STATUS, SHIP_TYPE, STATUS_SHOT, THREE_SHAPE_AREA_TYPE, TWO_SHAPE_AREA_TYPE } from '../constant/constant';
+import { COORDINATE_STATUS, EMPTY_SHAPE_AREA_TYPE, FOUR_SHAPE_AREA_TYPE, MISSION_TYPE, MULTIPLE_SHAPE_AREA_TYPE, MY_PLAYER_ID, SHIP_FINDING_STATUS, SHIP_TYPE, STATUS_SHOT, THREE_SHAPE_AREA_TYPE, TWO_SHAPE_AREA_TYPE } from '../constant/constant';
 import { NotifyDto } from '../dto/notify.dto';
-import { MyShipsDto } from '../dto/myShips.dto';
+import { Shape } from '../entities/shape.entity';
 
 @Injectable()
 export class ShootService {
@@ -44,58 +43,50 @@ export class ShootService {
       return
     }
     const enemyBoard = game.getEnemyBoard()
-    const shipCoordinatesInCurrentTargetArea = game.getShipCoordinatesInCurrentTargetArea()
-    const targetShotQueue = game.getTargetShotQueue()
     const shipsInEnermyBoard = game.getShipsInEnermyBoard()
 
     notifyDto.shots.forEach(shot => {
       const key_coordinate = '' + shot.coordinate[0] + shot.coordinate[1]
       if (shot.status == STATUS_SHOT.HIT) {
-        // Neu ban trung thi set toa do = ship
+        // Nếu bắn trung thì set toạ độ = ship
         enemyBoard.set(key_coordinate, COORDINATE_STATUS.SHIP)
-        const newCoordinate = new Coordinate(shot.coordinate[0], shot.coordinate[1])
-        // Them diem ban trung vao vung dang target
-        shipCoordinatesInCurrentTargetArea.push(newCoordinate)
-        // Them cac diem xung quanh diem ban trung vao vung chuan bi ban
-        targetShotQueue.clear()
-        this.findNewTargetAreaInMap(game)
       }
       if (shot.status == STATUS_SHOT.MISS) {
+        // Nếu bắn trượt thì set toạ độ = shot
         enemyBoard.set(key_coordinate, COORDINATE_STATUS.SHOT)
-        targetShotQueue.clear()
-        this.findNewTargetAreaInMap(game)
       }
     });
     notifyDto.sunkShips.forEach(sunkShip => {
       sunkShip.coordinates.forEach(coordinate => {
         const key_coordinate = '' + coordinate[0] + coordinate[1]
+        // Nếu tàu chìm thì set toạ độ = sunk
         enemyBoard.set(key_coordinate, COORDINATE_STATUS.SUNK)
       })
 
       const enemyShipIndex = shipsInEnermyBoard.ships.findIndex((ship) => {
         if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == sunkShip.type) {
           return true
-        } 
+        }
         return false
       })
-      if(enemyShipIndex >= 0){
+      if (enemyShipIndex >= 0) {
+        // Update con tàu mới chìm thành killed
         shipsInEnermyBoard.ships[enemyShipIndex].status = SHIP_FINDING_STATUS.KILLED
         shipsInEnermyBoard.ships[enemyShipIndex].coordinates = sunkShip.coordinates
       }
-      // Clear vung target hien tai
-      shipCoordinatesInCurrentTargetArea.length = 0
-      targetShotQueue.clear()
-      // Di tim vung target con lai trong ban do
-      this.findNewTargetAreaInMap(game)
     })
-
-    if (shipCoordinatesInCurrentTargetArea.length == 0) {
+  }
+  updateCurrentMission(game: Game) {
+    const targetShotQueue = game.getTargetShotQueue()
+    targetShotQueue.clear()
+    this.findNewTargetAreaInMap(game)
+    if (game.getShipCoordinatesInCurrentTargetArea().length == 0) {
       game.setCurrentMission(MISSION_TYPE.HUNTING)
     } else {
       game.setCurrentMission(MISSION_TYPE.TARGETING)
     }
-    console.log("targetShotQueue", targetShotQueue);
-    console.log("shipCoordinatesInCurrentTargetArea", shipCoordinatesInCurrentTargetArea);
+    console.log("targetShotQueue", game.getTargetShotQueue());
+    console.log("shipCoordinatesInCurrentTargetArea", game.getShipCoordinatesInCurrentTargetArea());
     console.log("shipsInEnermyBoard", game.getShipsInEnermyBoard());
     console.log("CurrentMission", game.getCurrentMission());
   }
@@ -112,9 +103,10 @@ export class ShootService {
       }
       if (firstShipCoordinate) break;
     }
+    const shipCoordinatesInCurrentTargetArea = game.getShipCoordinatesInCurrentTargetArea()
+    shipCoordinatesInCurrentTargetArea.length = 0
     if (!firstShipCoordinate) return
     const area = this.findCoorinatesShipAround(firstShipCoordinate, game, [])
-    const shipCoordinatesInCurrentTargetArea = game.getShipCoordinatesInCurrentTargetArea()
     if (area.length > 0) {
       area.forEach(coordinate => {
         shipCoordinatesInCurrentTargetArea.push(coordinate)
@@ -126,10 +118,12 @@ export class ShootService {
     const shipCoordinatesInCurrentTargetArea = game.getShipCoordinatesInCurrentTargetArea()
     const targetShotQueue = game.getTargetShotQueue()
     targetShotQueue.clear()
-    let checked = new Set()
-    // const recommendCoordinate = this.getRecommendCoordinate(game)
-    
-    
+    const checked = new Set()
+    const recommendCoordinate = this.getRecommendCoordinate(game)
+    if (recommendCoordinate) {
+      checked.add('' + recommendCoordinate.x + recommendCoordinate.y)
+      targetShotQueue.push(recommendCoordinate)
+    }
     shipCoordinatesInCurrentTargetArea.forEach(ship => {
       const availableAround = this.findCoorinatesAvailableAround(ship, game)
       availableAround.forEach(available => {
@@ -232,7 +226,7 @@ export class ShootService {
       if (board.get('' + new_x + coordinate.y) === COORDINATE_STATUS.WATER) {
         left = new Coordinate(new_x, coordinate.y)
         result.push(left)
-      }game
+      } game
     }
     if (coordinate.x < game.getBoardWidth() - 1) {
       const new_x = coordinate.x + 1;
@@ -251,14 +245,19 @@ export class ShootService {
     }
     return false
   }
-  getShapeAreaAndRecommend(game: Game){
+  getShapeAreaAndRecommend(game: Game) {
     const coordinates = game.getShipCoordinatesInCurrentTargetArea()
     const length = coordinates.length
     const result = {
-      shapeArea: MULTIPLE_SHAPE_AREA_TYPE,
+      shapeArea: '',
       recommends: []
     }
-    if(length == 2){
+    const pushToResult = (coordinate: Coordinate) => {
+      if (this.isCoordinateAvailableForShot(coordinate, game)) {
+        result.recommends.push(coordinate)
+      }
+    }
+    if (length == 2) {
       let highest = 0
       let lowest = 7
       let rightest = 0
@@ -268,31 +267,54 @@ export class ShootService {
       let numOfRightest = 0
       let numOfLeftest = 0
       coordinates.forEach(element => {
-        if(highest < element.y) highest = element.y
-        if(lowest > element.y) lowest = element.y
-        if(rightest < element.x) rightest = element.x
-        if(leftest > element.x) leftest = element.x
+        if (highest < element.y) highest = element.y
+        if (lowest > element.y) lowest = element.y
+        if (rightest < element.x) rightest = element.x
+        if (leftest > element.x) leftest = element.x
       });
       coordinates.forEach(element => {
-        if(highest == element.y) numOfHighest++
-        if(lowest == element.y) numOfLowest++
-        if(rightest == element.x) numOfRightest++
-        if(leftest == element.x) numOfLeftest++
+        if (highest == element.y) numOfHighest++
+        if (lowest == element.y) numOfLowest++
+        if (rightest == element.x) numOfRightest++
+        if (leftest == element.x) numOfLeftest++
       });
-      if(numOfHighest == 2 && numOfLowest == 2){
+      const shape = new Shape(highest, numOfHighest, lowest, numOfLowest, rightest, numOfRightest, leftest, numOfLeftest)
+      let toCV = { isOK: false, recommend: null }
+      let toBB = { isOK: false, recommend: null }
+      let toOR = { isOK: false, recommend: null }
+      let toCA = { isOK: false, recommend: null }
+      if (numOfHighest == 2 && numOfLowest == 2) {
         result.shapeArea = TWO_SHAPE_AREA_TYPE.TWO_1
-        result.recommends.push(new Coordinate(rightest+1, highest))
-        result.recommends.push(new Coordinate(leftest-1, highest))
-        result.recommends.push(new Coordinate(leftest-1, highest))
-        result.recommends.push(new Coordinate(leftest-1, highest))
-        result.recommends.push(new Coordinate(leftest-1, highest))
-        result.recommends.push(new Coordinate(leftest-1, highest))
-      } 
-      if(numOfRightest == 2 && numOfLeftest == 2){
+        toCV = this.isTwo1ToCV(shape, game)
+        toBB = this.isTwo1ToBB(shape, game)
+        toOR = this.isTwo1ToOR(shape, game)
+        toCA = this.isTwo1ToCA(shape, game)
+      }
+      if (numOfRightest == 2 && numOfLeftest == 2) {
         result.shapeArea = TWO_SHAPE_AREA_TYPE.TWO_2
-      } 
+        toCV = this.isTwo2ToCV(shape, game)
+        toBB = this.isTwo2ToBB(shape, game)
+        toOR = this.isTwo2ToOR(shape, game)
+        toCA = this.isTwo2ToCA(shape, game)
+      }
+      let recommend = null
+      if (toCV.isOK) {
+        recommend = toCV.recommend
+      }
+      if (toBB.isOK) {
+        recommend = toBB.recommend
+      }
+      if (toOR.isOK) {
+        recommend = toOR.recommend
+      }
+      if (toCA.isOK) {
+        recommend = toCA.recommend
+      }
+      if (recommend) {
+        pushToResult(recommend)
+      }
     }
-    if(length == 3){
+    if (length == 3) {
       let highest = 0
       let lowest = 7
       let rightest = 0
@@ -302,37 +324,65 @@ export class ShootService {
       let numOfRightest = 0
       let numOfLeftest = 0
       coordinates.forEach(element => {
-        if(highest < element.y) highest = element.y
-        if(lowest > element.y) lowest = element.y
-        if(rightest < element.x) rightest = element.x
-        if(leftest > element.x) leftest = element.x
+        if (highest < element.y) highest = element.y
+        if (lowest > element.y) lowest = element.y
+        if (rightest < element.x) rightest = element.x
+        if (leftest > element.x) leftest = element.x
       });
       coordinates.forEach(element => {
-        if(highest == element.y) numOfHighest++
-        if(lowest == element.y) numOfLowest++
-        if(rightest == element.x) numOfRightest++
-        if(leftest == element.x) numOfLeftest++
+        if (highest == element.y) numOfHighest++
+        if (lowest == element.y) numOfLowest++
+        if (rightest == element.x) numOfRightest++
+        if (leftest == element.x) numOfLeftest++
       });
-      if(numOfHighest == 3 && numOfLowest == 3){
+      const shape = new Shape(highest, numOfHighest, lowest, numOfLowest, rightest, numOfRightest, leftest, numOfLeftest)
+      let toCV = { isOK: false, recommend: null }
+      let toBB = { isOK: false, recommend: null }
+      let toOR = { isOK: false, recommend: null }
+      let recommend = null
+      if (numOfHighest == 3 && numOfLowest == 3) {
         result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_1
-      } 
-      if(numOfRightest == 3 && numOfLeftest == 3){
+        toCV = this.isThree1ToCV(shape, game)
+        toBB = this.isThree1ToBB(shape, game)
+      }
+      if (numOfRightest == 3 && numOfLeftest == 3) {
         result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_2
-      } 
-      if(numOfHighest == 2 && numOfLowest == 1 && numOfRightest == 1 && numOfLeftest == 2){
+        toCV = this.isThree2ToCV(shape, game)
+        toBB = this.isThree2ToBB(shape, game)
+      }
+      if (numOfHighest == 2 && numOfLowest == 1 && numOfRightest == 1 && numOfLeftest == 2) {
         result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_3
-      } 
-      if(numOfHighest == 2 && numOfLowest == 1 && numOfRightest == 2 && numOfLeftest == 1){
+        toCV = this.isThree3ToCV(shape, game)
+        toOR = this.isThree3ToOR(shape, game)
+      }
+      if (numOfHighest == 2 && numOfLowest == 1 && numOfRightest == 2 && numOfLeftest == 1) {
         result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_4
-      } 
-      if(numOfHighest == 1 && numOfLowest == 2 && numOfRightest == 1 && numOfLeftest == 2){
+        toCV = this.isThree4ToCV(shape, game)
+        toOR = this.isThree4ToOR(shape, game)
+      }
+      if (numOfHighest == 1 && numOfLowest == 2 && numOfRightest == 1 && numOfLeftest == 2) {
         result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_5
-      } 
-      if(numOfHighest == 1 && numOfLowest == 2 && numOfRightest == 2 && numOfLeftest == 1){
+        toOR = this.isThree5ToOR(shape, game)
+      }
+      if (numOfHighest == 1 && numOfLowest == 2 && numOfRightest == 2 && numOfLeftest == 1) {
         result.shapeArea = THREE_SHAPE_AREA_TYPE.THREE_6
-      } 
+        toCV = this.isThree6ToCV(shape, game)
+        toOR = this.isThree6ToOR(shape, game)
+      }
+      if (toCV.isOK) {
+        recommend = toCV.recommend
+      }
+      if (toBB.isOK) {
+        recommend = toBB.recommend
+      }
+      if (toOR.isOK) {
+        recommend = toOR.recommend
+      }
+      if (recommend) {
+        pushToResult(recommend)
+      }
     }
-    if(length == 4){
+    if (length == 4) {
       let highest = 0
       let lowest = 7
       let rightest = 0
@@ -342,105 +392,421 @@ export class ShootService {
       let numOfRightest = 0
       let numOfLeftest = 0
       coordinates.forEach(element => {
-        if(highest < element.y) highest = element.y
-        if(lowest > element.y) lowest = element.y
-        if(rightest < element.x) rightest = element.x
-        if(leftest > element.x) leftest = element.x
+        if (highest < element.y) highest = element.y
+        if (lowest > element.y) lowest = element.y
+        if (rightest < element.x) rightest = element.x
+        if (leftest > element.x) leftest = element.x
       });
       coordinates.forEach(element => {
-        if(highest == element.y) numOfHighest++
-        if(lowest == element.y) numOfLowest++
-        if(rightest == element.x) numOfRightest++
-        if(leftest == element.x) numOfLeftest++
+        if (highest == element.y) numOfHighest++
+        if (lowest == element.y) numOfLowest++
+        if (rightest == element.x) numOfRightest++
+        if (leftest == element.x) numOfLeftest++
       });
-      if(numOfHighest == 1 && numOfLowest == 2 && numOfLeftest == 1 && numOfRightest == 3){
+      const shape = new Shape(highest, numOfHighest, lowest, numOfLowest, rightest, numOfRightest, leftest, numOfLeftest)
+      let toCV = { isOK: false, recommend: null }
+      let recommend = null
+      if (numOfHighest == 4 && numOfLowest == 4) {
         result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_1
-      } 
-      if(numOfHighest == 1 && numOfLowest == 1 && numOfLeftest == 1 && numOfRightest == 3){
+        toCV = this.isFour1ToCV(shape, game)
+      }
+      if (numOfLeftest == 4 && numOfRightest == 4) {
         result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_2
-      } 
-      if(numOfHighest == 3 && numOfLowest == 1 && numOfLeftest == 2 && numOfRightest == 1){
+        toCV = this.isFour2ToCV(shape, game)
+      }
+      if (numOfHighest == 1 && numOfLowest == 2 && numOfLeftest == 1 && numOfRightest == 3) {
         result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_3
-      } 
-      if(numOfHighest == 3 && numOfLowest == 1 && numOfLeftest == 1 && numOfRightest == 1){
+        toCV = this.isFour3ToCV(shape, game)
+      }
+      if (numOfHighest == 1 && numOfLowest == 1 && numOfLeftest == 1 && numOfRightest == 3) {
         result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_4
-      } 
+        toCV = this.isFour4ToCV(shape, game)
+      }
+      if (numOfHighest == 3 && numOfLowest == 1 && numOfLeftest == 2 && numOfRightest == 1) {
+        result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_5
+        toCV = this.isFour5ToCV(shape, game)
+      }
+      if (numOfHighest == 3 && numOfLowest == 1 && numOfLeftest == 1 && numOfRightest == 1) {
+        result.shapeArea = FOUR_SHAPE_AREA_TYPE.FOUR_6
+        toCV = this.isFour6ToCV(shape, game)
+      }
+      if (toCV.isOK) {
+        recommend = toCV.recommend
+      }
+      if (recommend) {
+        pushToResult(recommend)
+      }
+    }
+    if (result.recommends.length == 0) {
+      result.shapeArea = MULTIPLE_SHAPE_AREA_TYPE
+    }
+    if (length == 0) {
+      result.shapeArea = EMPTY_SHAPE_AREA_TYPE
     }
     return result
   }
   getRecommendCoordinate(game: Game): Coordinate | null {
-    // const { shapeArea, recommends } = this.getShapeAreaAndRecommend(game)
-
-    // console.log("shapeArea",shapeArea);
-    // if(shapeArea == TWO_SHAPE_AREA_TYPE.TWO_1){
-      
-    // }
-    return
+    const { shapeArea, recommends } = this.getShapeAreaAndRecommend(game)
+    console.log("shapeArea", shapeArea);
+    if (recommends.length > 0) {
+      return recommends[0]
+    }
+    return null
   }
-  isRemainDD(game: Game): boolean{
+  isRemainDD(game: Game): boolean {
     const shipsInEnermyBoard = game.getShipsInEnermyBoard()
     const index = shipsInEnermyBoard.ships.findIndex((ship) => {
       if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.DD) {
         return true
-      } 
+      }
     })
     return index >= 0
   }
-  isRemainCA(game: Game): boolean{
+  isRemainCA(game: Game): boolean {
     const shipsInEnermyBoard = game.getShipsInEnermyBoard()
     const index = shipsInEnermyBoard.ships.findIndex((ship) => {
       if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.CA) {
         return true
-      } 
+      }
     })
     return index >= 0
   }
-  isRemainOR(game: Game): boolean{
+  isRemainOR(game: Game): boolean {
     const shipsInEnermyBoard = game.getShipsInEnermyBoard()
     const index = shipsInEnermyBoard.ships.findIndex((ship) => {
       if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.OR) {
         return true
-      } 
+      }
     })
     return index >= 0
   }
-  isRemainBB(game: Game): boolean{
+  isRemainBB(game: Game): boolean {
     const shipsInEnermyBoard = game.getShipsInEnermyBoard()
     const index = shipsInEnermyBoard.ships.findIndex((ship) => {
       if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.BB) {
         return true
-      } 
+      }
     })
     return index >= 0
   }
-  isRemainCV(game: Game): boolean{
+  isRemainCV(game: Game): boolean {
     const shipsInEnermyBoard = game.getShipsInEnermyBoard()
     const index = shipsInEnermyBoard.ships.findIndex((ship) => {
       if (ship.status == SHIP_FINDING_STATUS.FINDING && ship.type == SHIP_TYPE.CV) {
         return true
-      } 
+      }
     })
     return index >= 0
   }
   isNeedThree12(game: Game): boolean {
     const isRemainCA = this.isRemainCA(game)
     const isRemainBB = this.isRemainBB(game)
-    const isRemainOR = this.isRemainOR(game)
     const isRemainCV = this.isRemainCV(game)
-    return isRemainCA || isRemainBB || isRemainOR || isRemainCV
+    return isRemainCA || isRemainBB || isRemainCV
   }
   isNeedThree3456(game: Game): boolean {
-    const isRemainCA = this.isRemainCA(game)
-    const isRemainBB = this.isRemainBB(game)
     const isRemainOR = this.isRemainOR(game)
     const isRemainCV = this.isRemainCV(game)
-    return isRemainBB || isRemainOR || isRemainCV
+    return isRemainOR || isRemainCV
   }
-  isNeedFour(game: Game): boolean {
-    const isRemainCA = this.isRemainCA(game)
+  isNeedFour12(game: Game): boolean {
     const isRemainBB = this.isRemainBB(game)
-    const isRemainOR = this.isRemainOR(game)
     const isRemainCV = this.isRemainCV(game)
-    return isRemainBB || isRemainOR || isRemainCV
+    return isRemainBB || isRemainCV
+  }
+  isNeedFour3456(game: Game): boolean {
+    const isRemainCV = this.isRemainCV(game)
+    return isRemainCV
+  }
+  isNeedFour7(game: Game): boolean {
+    const isRemainOR = this.isRemainOR(game)
+    return isRemainOR
+  }
+  checkAllCoordinatesToShip(cases: Coordinate[][], game: Game): { isOK: boolean, recommend: Coordinate } {
+    for (let i = 0; i < cases.length; i++) {
+      const isCaseOK = cases[i].every(coordinate => {
+        const status = game.getEnemyBoard().get('' + coordinate.x + coordinate.y)
+        if (status == COORDINATE_STATUS.WATER || status == COORDINATE_STATUS.SHIP) {
+          return true
+        }
+      })
+      if (isCaseOK) {
+        return {
+          isOK: true,
+          recommend: cases[i][0]
+        }
+      }
+    }
+    return {
+      isOK: false,
+      recommend: null
+    }
+  }
+  isTwo1ToCA(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCA(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest)]
+    const case2 = [new Coordinate(shape.leftest - 1, shape.highest)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isTwo1ToOR(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainOR(game)
+    const case1 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.leftest, shape.highest + 1)]
+    const case2 = [new Coordinate(shape.rightest, shape.highest - 1), new Coordinate(shape.leftest, shape.highest - 1)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isTwo1ToBB(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainBB(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest), new Coordinate(shape.rightest + 2, shape.highest)]
+    const case2 = [new Coordinate(shape.leftest - 1, shape.highest), new Coordinate(shape.leftest - 2, shape.highest)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isTwo1ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest), new Coordinate(shape.rightest + 2, shape.highest), new Coordinate(shape.rightest, shape.highest - 1)]
+    const case2 = [new Coordinate(shape.rightest + 1, shape.highest), new Coordinate(shape.leftest - 1, shape.highest), new Coordinate(shape.leftest, shape.highest - 1)]
+    const case3 = [new Coordinate(shape.leftest - 1, shape.highest), new Coordinate(shape.leftest - 2, shape.highest), new Coordinate(shape.leftest - 1, shape.highest - 1)]
+    const case4 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.rightest, shape.highest + 2), new Coordinate(shape.rightest, shape.highest - 1)]
+    const cases = [case1, case2, case3, case4]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isTwo2ToCA(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCA(game)
+    const case1 = [new Coordinate(shape.rightest, shape.highest + 1)]
+    const case2 = [new Coordinate(shape.rightest, shape.lowest - 1)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isTwo2ToOR(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainOR(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest), new Coordinate(shape.rightest + 1, shape.lowest)]
+    const case2 = [new Coordinate(shape.leftest - 1, shape.highest), new Coordinate(shape.leftest - 1, shape.lowest)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isTwo2ToBB(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainBB(game)
+    const case1 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.rightest, shape.highest + 2)]
+    const case2 = [new Coordinate(shape.rightest, shape.lowest - 1), new Coordinate(shape.rightest, shape.lowest - 2)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isTwo2ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest, shape.lowest - 1), new Coordinate(shape.rightest, shape.lowest - 2), new Coordinate(shape.rightest - 1, shape.lowest - 1)]
+    const case2 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.rightest, shape.lowest - 1), new Coordinate(shape.rightest - 1, shape.lowest)]
+    const case3 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.rightest, shape.highest + 2), new Coordinate(shape.rightest - 1, shape.highest)]
+    const case4 = [new Coordinate(shape.leftest - 1, shape.highest), new Coordinate(shape.leftest + 1, shape.highest), new Coordinate(shape.leftest + 2, shape.highest)]
+    const cases = [case1, case2, case3, case4]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree1ToBB(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainBB(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest)]
+    const case2 = [new Coordinate(shape.leftest - 1, shape.highest)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree1ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest), new Coordinate(shape.leftest + 1, shape.highest - 1)]
+    const case2 = [new Coordinate(shape.leftest - 1, shape.highest), new Coordinate(shape.leftest, shape.highest - 1)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree2ToBB(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainBB(game)
+    const case1 = [new Coordinate(shape.rightest, shape.highest + 1)]
+    const case2 = [new Coordinate(shape.rightest, shape.lowest - 1)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree2ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest, shape.lowest - 1), new Coordinate(shape.rightest - 1, shape.lowest)]
+    const case2 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.rightest - 1, shape.highest - 1)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree3ToOR(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainOR(game)
+    const case1 = [new Coordinate(shape.rightest, shape.lowest)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree3ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.leftest - 1, shape.highest), new Coordinate(shape.rightest + 1, shape.highest)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree4ToOR(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainOR(game)
+    const case1 = [new Coordinate(shape.leftest, shape.lowest)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree4ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest), new Coordinate(shape.rightest + 2, shape.highest)]
+    const case2 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.rightest, shape.highest + 2)]
+    const cases = [case1, case2]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree5ToOR(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainOR(game)
+    const case1 = [new Coordinate(shape.rightest, shape.highest)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree6ToOR(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainOR(game)
+    const case1 = [new Coordinate(shape.leftest, shape.highest)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isThree6ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest, shape.highest + 1), new Coordinate(shape.rightest, shape.lowest - 1)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isFour1ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.leftest + 1, shape.highest - 1)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isFour2ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.leftest - 1, shape.lowest + 1)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isFour3ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest, shape.lowest - 1)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isFour4ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest, shape.highest + 1)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isFour5ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.leftest - 1, shape.highest)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
+  }
+  isFour6ToCV(shape: Shape, game): { isOK: boolean, recommend: Coordinate } {
+    const isRemain = this.isRemainCV(game)
+    const case1 = [new Coordinate(shape.rightest + 1, shape.highest)]
+    const cases = [case1]
+    const checkResult = this.checkAllCoordinatesToShip(cases, game)
+    return {
+      isOK: checkResult.isOK && isRemain,
+      recommend: checkResult.recommend
+    }
   }
 }

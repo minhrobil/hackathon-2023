@@ -33,20 +33,24 @@ export const TWO_SHAPE_AREA_TYPE = {
 export const THREE_SHAPE_AREA_TYPE = {
     THREE_1: "THREE_1", // 3 o hang ngang
     THREE_2: "THREE_2", // 3 o hang doc
-    THREE_3: "THREE_3", // 3 o cheo, thieu o hang duoi ben phai,
-    THREE_4: "THREE_4", // 3 o cheo, thieu o hang duoi ben trai
-    THREE_5: "THREE_5", // 3 o cheo, thieu o hang tren ben phai
-    THREE_6: "THREE_6", // 3 o cheo, thieu o hang tren ben trai
+    THREE_3: "THREE_3", // 3 o cheo, thieu ô hang duoi ben phai,
+    THREE_4: "THREE_4", // 3 o cheo, thieu ô hang duoi ben trai
+    THREE_5: "THREE_5", // 3 o cheo, thieu ô hang tren ben phai
+    THREE_6: "THREE_6", // 3 o cheo, thieu ô hang tren ben trai
 }
 
 export const FOUR_SHAPE_AREA_TYPE = {
-    FOUR_1: "FOUR_1", // CV doc, thieu o duoi cung
-    FOUR_2: "FOUR_2", // CV doc, thieu o tren cung
-    FOUR_3: "FOUR_3", // CV ngang, thieu o ben trai
-    FOUR_4: "FOUR_4", // CV ngang, thieu o ben phai
+    FOUR_1: "FOUR_1", // CV ngang, thiếu mấu bên dưới
+    FOUR_2: "FOUR_2", // CV dọc, thiếu mấu bên phải
+    FOUR_3: "FOUR_3", // CV dọc, thiếu ô dưới cùng
+    FOUR_4: "FOUR_4", // CV dọc, thiếu ô trên cùng
+    FOUR_5: "FOUR_5", // CV ngang, thiếu ô bên trái
+    FOUR_6: "FOUR_6", // CV ngang, thiếu ô bên phải
+    FOUR_7: "FOUR_7", // 2*2 OR
 }
 
 export const MULTIPLE_SHAPE_AREA_TYPE = "MULTIPLE_SHAPE_AREA_TYPE"
+export const EMPTY_SHAPE_AREA_TYPE = "EMPTY_SHAPE_AREA_TYPE"
 
 export const SHIP_TYPE = {
     CV: "CV",

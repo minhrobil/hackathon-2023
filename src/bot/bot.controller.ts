@@ -11,7 +11,7 @@ import { HeaderDto } from './dto/header.dto';
 
 @Controller('')
 export class BotController {
-  constructor(private readonly botService: BotService) {}
+  constructor(private readonly botService: BotService) { }
 
   @Get("/ping")
   ping() {
@@ -19,56 +19,62 @@ export class BotController {
   }
 
   @Post("/invite")
-  // @UseInterceptors(HeaderInterceptor)
-  @HttpCode(200)
-  async invite(@Body() inviteDto: InviteDto,@Headers() headers: HeaderDto, @Res() res: Response){
-    const session: string = headers['x-session-id'] 
-    const token: string = headers['x-token'] 
-    res.setHeader('x-session-id', session)
-    res.setHeader('x-token', token)
-
-    // const data = await this.botService.invite(inviteDto, session)
-    console.log("invite", res.json());
-    return res.json("data") 
-    // console.log("minh");
-    
-    // return res.json({}) 
+  @UseInterceptors(HeaderInterceptor)
+  async invite(@Body() inviteDto: InviteDto, @Headers() headers: HeaderDto, @Res() res: Response) {
+    try {
+      const session: string = headers['x-session-id']
+      const data = await this.botService.invite(inviteDto, session)
+      return res.json(data)
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Post("/place-ships")
   @UseInterceptors(HeaderInterceptor)
-  @HttpCode(200)
-  placeShips(@Body() placeShipDto: PlaceShipDto,@Headers() headers: HeaderDto, @Res() res: Response) {
-    const session: string = headers['x-session-id'] 
-    const data = this.botService.placeShips(placeShipDto, session);
-    // console.log("place-ships", res.json(data) );
-    return res.json(data) 
+  placeShips(@Body() placeShipDto: PlaceShipDto, @Headers() headers: HeaderDto, @Res() res: Response) {
+    try {
+      const session: string = headers['x-session-id']
+      const data = this.botService.placeShips(placeShipDto, session);
+      return res.json(data)
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Post("/shoot")
   @UseInterceptors(HeaderInterceptor)
-  @HttpCode(200)
-  shoot(@Body() shootDto: ShootDto,@Headers() headers: HeaderDto, @Res() res: Response) {
-    const session: string = headers['x-session-id']
-    const data = this.botService.shoot(shootDto, session);
-    return res.json(data)
+  shoot(@Body() shootDto: ShootDto, @Headers() headers: HeaderDto, @Res() res: Response) {
+    try {
+      const session: string = headers['x-session-id']
+      const data = this.botService.shoot(shootDto, session);
+      return res.json(data)
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Post("/notify")
   @UseInterceptors(HeaderInterceptor)
-  @HttpCode(200)
-  notify(@Body() notifyDto: NotifyDto,@Headers() headers: HeaderDto, @Res() res: Response) {
-    const session: string = headers['x-session-id']
-    const data = this.botService.notify(notifyDto, session);
-    return res.json(data) 
+  notify(@Body() notifyDto: NotifyDto, @Headers() headers: HeaderDto, @Res() res: Response) {
+    try {
+      const session: string = headers['x-session-id']
+      const data = this.botService.notify(notifyDto, session);
+      return res.json(data)
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Post("/game-over")
   @UseInterceptors(HeaderInterceptor)
-  @HttpCode(200)
-  gameOver(@Body() gameOverDto: GameOverDto,@Headers() headers: HeaderDto, @Res() res: Response) {
-    const session: string = headers['x-session-id']
-    const data = this.botService.gameOver(gameOverDto, session);
-    return res.json(data) 
+  gameOver(@Body() gameOverDto: GameOverDto, @Headers() headers: HeaderDto, @Res() res: Response) {
+    try {
+      const session: string = headers['x-session-id']
+      const data = this.botService.gameOver(gameOverDto, session);
+      return res.json(data)
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
