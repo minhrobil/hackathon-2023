@@ -1,3 +1,4 @@
+import moment, { Moment } from "moment";
 import { MISSION_TYPE, TACTIC } from "../constant/constant";
 import { MyShipsDto } from "../dto/myShips.dto";
 import { Coordinate } from "../entities/coordinate.entity";
@@ -10,28 +11,46 @@ export class Game {
 
     //Thong tin game
     private session = '';
-
+    private lastAccess: Moment;
     //Thong tin quan ta
-    private currentTactic: number = TACTIC.TIGER //Chien dich 
+    private currentTactic: string;//Chien dich 
     private boardWidth = 0
     private boardHeight = 0
     private player1 = ''
     private player2 = ''
-    private currentMission: number = MISSION_TYPE.HUNTING; //Mission hiện tại
-    private myBoard: Map<string, number> = new Map()//Bản đồ quân ta
+    private currentMission: string = MISSION_TYPE.HUNTING; //Mission hiện tại
+    private myBoard: Map<string, string> = new Map()//Bản đồ quân ta
     private shipsInMyBoard: MyShipsDto = new MyShipsDto()
     //Phan thong tin ke dich
-    private enemyBoard: Map<string, number> = new Map(); //Bản đồ quân địch
+    private enemyBoard: Map<string, string> = new Map(); //Bản đồ quân địch
     private huntShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi hunting theo chiến dịch ban dau
     private shipCoordinatesInCurrentTargetArea: Array<Coordinate> = []//Danh sach cac toa do tau trong vung target hien tai
     private targetShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi target trong vung hien tai
     private shipsInEnermyBoard: MyShipsDto = new MyShipsDto()
+
+      /**
+     * Getter currentMission
+     * @return {Moment }
+     */
+
+      public getLastAccess(): Moment {
+        return this.lastAccess;
+    }
+
+    /**
+     * Setter currentMission
+     * @param {Moment } value
+     */
+    public setLastAccess(value: Moment) {
+        this.lastAccess = value;
+    }
+
     /**
      * Getter currentMission
      * @return {number }
      */
 
-    public getCurrentMission(): number {
+    public getCurrentMission(): string {
         return this.currentMission;
     }
 
@@ -39,7 +58,7 @@ export class Game {
      * Setter currentMission
      * @param {number } value
      */
-    public setCurrentMission(value: number) {
+    public setCurrentMission(value: string) {
         this.currentMission = value;
     }
 
@@ -118,9 +137,9 @@ export class Game {
 
     /**
      * Getter currentTactic
-     * @return {number }
+     * @return {string }
      */
-    public getCurrentTactic(): number {
+    public getCurrentTactic(): string {
         return this.currentTactic;
     }
 
@@ -128,7 +147,7 @@ export class Game {
      * Getter myBoard
      * @return {Map<string, number> }
      */
-    public getMyBoard(): Map<string, number> {
+    public getMyBoard(): Map<string, string> {
         return this.myBoard;
     }
 
@@ -136,7 +155,7 @@ export class Game {
      * Getter enemyBoard
      * @return {Map<string, number> }
      */
-    public getEnemyBoard(): Map<string, number> {
+    public getEnemyBoard(): Map<string, string> {
         return this.enemyBoard;
     }
 
@@ -166,9 +185,9 @@ export class Game {
 
     /**
      * Setter currentTactic
-     * @param {number } value
+     * @param {string } value
      */
-    public setCurrentTactic(value: number) {
+    public setCurrentTactic(value: string) {
         this.currentTactic = value;
     }
 
@@ -176,7 +195,7 @@ export class Game {
      * Setter myBoard
      * @param {Map<string, number> } value
      */
-    public setMyBoard(value: Map<string, number>) {
+    public setMyBoard(value: Map<string, string>) {
         this.myBoard = value;
     }
 
@@ -184,7 +203,7 @@ export class Game {
      * Setter enemyBoard
      * @param {Map<string, number> } value
      */
-    public setEnemyBoard(value: Map<string, number>) {
+    public setEnemyBoard(value: Map<string, string>) {
         this.enemyBoard = value;
     }
 

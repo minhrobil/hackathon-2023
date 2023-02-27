@@ -1,18 +1,19 @@
 export const TACTIC = {
-    TIGER: 0, //Chiến thuật Tiger
-    WOLF: 1, //Chiến thuật Wolf
-    SNAKE: 2 //Chien thuat Snake
+    TIGER: "TIGER", //Chiến thuật Tiger
+    WOLF: "WOLF", //Chiến thuật Wolf
+    SNAKE: "SNAKE", //Chien thuat Snake
+    CAT: "CAT" //Chien thuat Cat
 }
 export const COORDINATE_STATUS = {
-    WATER: 1, //Chưa bắn vào ô này
-    SHIP: 2, //Bắn trúng tàu, chưa chìm
-    SHOT: 3, //Bắn vào ô không có tàu
-    SUNK: 4 //Vị trí đã chìm của tàu 
+    WATER: "1", //Chưa bắn vào ô này
+    SHIP: "2", //Bắn trúng tàu, chưa chìm
+    SHOT: "3", //Bắn vào ô không có tàu
+    SUNK: "4" //Vị trí đã chìm của tàu 
 }
 
 export const MISSION_TYPE = {
-    HUNTING: 0, //Chế độ đi săn
-    TARGETING: 1, //Chế độ khoá mục tiêu
+    HUNTING: "HUNTING", //Chế độ đi săn
+    TARGETING: "TARGETING", //Chế độ khoá mục tiêu
 }
 
 export const STATUS_SHOT = {
@@ -60,4 +61,8 @@ export const SHIP_TYPE = {
     DD: "DD"
 }
 
+export const MAX_SHOOT = 4
+export const MIN_SHOOT = 1
+
+export const SMART_MODE = 1
 export const MY_PLAYER_ID = "BAOTHU"

@@ -10,6 +10,7 @@ import { MISSION_TYPE, SHIP_FINDING_STATUS } from './constant/constant';
 import { Game } from './logic/game.service';
 import { MyShipsDto } from './dto/myShips.dto';
 import axios, { AxiosResponse } from 'axios'
+import * as moment from "moment";
 @Injectable()
 export class BotService {
   constructor(
@@ -18,6 +19,13 @@ export class BotService {
   ) { }
 
   private games: Map<string, Game> = new Map()
+  getGameBySession(session: string){
+    const game = this.games.get(session);
+    if(game){
+      game.setLastAccess(moment())
+    }
+    return game
+  }
   async getShipsPlaceJava(inviteDto: InviteDto): Promise<AxiosResponse> {
     try {
       return await axios.post(process.env.URI_PLACE_SHIP, inviteDto, {
@@ -30,15 +38,21 @@ export class BotService {
     }
   }
   async invite(inviteDto: InviteDto, session: string) {
+    console.log("gameBeforeDelete", this.games);
+    this.deleteOldGames()
+    console.log("gameAfterDelete", this.games);
+
     if (this.games.has(session)) {
       return { success: false }
     }
     const game: Game = new Game(session)
     game.setBoardWidth(inviteDto.boardWidth)
     game.setBoardHeight(inviteDto.boardHeight)
+    game.setCurrentTactic(process.env.TACTIC)
+    game.setLastAccess(moment())
 
     this.placeShipService.initBoard(game.getMyBoard(), game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
-    this.placeShipService.initHuntShotQueue(game.getHuntShotQueue(), game.getCurrentTactic())
+    this.placeShipService.initHuntShotQueue(game)
     const enermyShips: MyShipsDto = { ships: [] }
     inviteDto.ships.forEach(ship => {
       for (let i = 1; i <= ship.quantity; i++) {
@@ -58,13 +72,12 @@ export class BotService {
       }
     }
     this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
-    console.log("EnermyBoard", game.getShipsInEnermyBoard());
     this.games.set(session, game);
     return { success: true };
   }
 
   placeShips(placeShipDto: PlaceShipDto, session: string) {
-    const game = this.games.get(session);
+    const game = this.getGameBySession(session)
     if (!game) {
       return { success: false }
     }
@@ -86,7 +99,7 @@ export class BotService {
 
   shoot(shootDto: ShootDto, session: string) {
     console.log("Next shoot!!!");
-    const game = this.games.get(session);
+    const game = this.getGameBySession(session)
     if (!game) {
       return { success: false }
     }
@@ -113,7 +126,7 @@ export class BotService {
   }
 
   notify(notifyDto: NotifyDto, session: string) {
-    const game = this.games.get(session);
+    const game = this.getGameBySession(session)
     if (!game) {
       return { success: false }
     }
@@ -123,11 +136,23 @@ export class BotService {
   }
 
   gameOver(gameOverDto: GameOverDto, session: string) {
-    const game = this.games.get(session);
+    const game = this.getGameBySession(session)
     if (!game) {
       return { success: false }
+    }else{
+      this.games.delete(session)
     }
-
     return { success: true };
+  }
+  deleteOldGames(){
+    const gameSessionOlds = []
+    this.games.forEach(game=>{
+      if(moment().diff(game.getLastAccess(),'minutes') > 10){
+        gameSessionOlds.push(game.getSession())
+      }
+    })
+    gameSessionOlds.forEach(session => {
+      this.games.delete(session)
+    });
   }
 }

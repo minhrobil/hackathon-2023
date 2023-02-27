@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { COORDINATE_STATUS, TACTIC } from '../constant/constant';
+import { COORDINATE_STATUS, SHIP_TYPE, TACTIC } from '../constant/constant';
 import { Coordinate } from '../entities/coordinate.entity';
 import { Queue } from './queue.service';
 import { MyShipsDto } from '../dto/myShips.dto';
 import { COORDINATE_TIGER_TATIC } from '../constant/coordinate.tiger.tatic';
 import { Game } from './game.service';
+import { COORDINATE_CAT_TACTIC } from '../constant/coordinate.cat.tatic';
 
 @Injectable()
 export class PlaceShipService {
-  initBoard(myBoard: Map<string, number>, enemyBoard: Map<string, number>, boardWidth: number, boardHeight: number) {
+  initBoard(myBoard: Map<string, string>, enemyBoard: Map<string, string>, boardWidth: number, boardHeight: number) {
     for (let y = 0; y < boardHeight; y++) {
       for (let x = 0; x < boardWidth; x++) {
         myBoard.set('' + x + y, COORDINATE_STATUS.WATER)
@@ -77,22 +78,121 @@ export class PlaceShipService {
     game.setShipsInMyBoard(myShips)
     myShips.ships.forEach(ship => {
       ship.coordinates.forEach(coordinate => {
-        myBoard.set('' + coordinate['x'] + coordinate['y'], COORDINATE_STATUS.SHIP)
+        myBoard.set('' + coordinate['x'] + coordinate['y'], ship.type)
       })
 
     })
     this.printBoard(myBoard, game.getBoardWidth(), game.getBoardHeight())
   }
 
-  initHuntShotQueue(huntShotQueue: Queue<Coordinate>, currentTactic: number) {
+  initHuntShotQueue(game: Game) {
+    const huntShotQueue = game.getHuntShotQueue()
+    const currentTactic = game.getCurrentTactic()
     if (currentTactic === TACTIC.TIGER) {
       COORDINATE_TIGER_TATIC.forEach(coordinate => {
+        huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
+      })
+    }
+    if (currentTactic === TACTIC.SNAKE) {
+      const coordinates = this.makeCoordinatesSnake(game)
+      coordinates.forEach(coordinate => {
+        huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
+      });
+    }
+    if (currentTactic === TACTIC.WOLF) {
+      const coordinates = this.makeCoordinatesWolf(game)
+      coordinates.forEach(coordinate => {
+        huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
+      });
+    }
+    if (currentTactic === TACTIC.CAT) {
+      const coordinates = this.makeCoordinatesCat(game)
+      coordinates.forEach(coordinate => {
         huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
       });
     }
   }
 
-  printBoard(board: Map<string, number>, boardWidth: number, boardHeight: number) {
+  makeCoordinatesSnake(game: Game) {
+    const boardWidth = game.getBoardWidth()
+    const boardHeight = game.getBoardHeight()
+    const result = []
+    for (let y = 0; y < boardHeight; y++) {
+      for (let x = 0; x < boardWidth; x++) {
+        if (y % 2 == 0 && x % 2 == 0) {
+          result.push({x, y})
+        }
+        if (y % 2 == 1 && x % 2 == 1) {
+          result.push({x, y})
+        }
+      }
+    }
+    return result
+  }
+  makeCoordinatesCat(game: Game) {
+    const boardWidth = game.getBoardWidth()
+    const boardHeight = game.getBoardHeight()
+    const result = [...COORDINATE_CAT_TACTIC]
+    const checked = new Set()
+    result.forEach(element => {
+      const keyCheck = ''+element.x+element.y
+      checked.add(keyCheck)
+    });
+    for (let y = 0; y < boardHeight; y++) {
+      for (let x = 0; x < boardWidth; x++) {
+        const keyCheck = ''+x+y
+        if (y % 2 == 0 && x % 2 == 0) {
+          if (!checked.has(keyCheck)) {
+            checked.add(keyCheck)
+            result.push({x, y})
+          }
+        }
+        if (y % 2 == 1 && x % 2 == 1) {
+          if (!checked.has(keyCheck)) {
+            checked.add(keyCheck)
+            result.push({x, y})
+          }
+        }
+      }
+    }
+    return result
+  }
+  makeCoordinatesWolf(game: Game) {
+    const boardWidth = game.getBoardWidth()
+    const boardHeight = game.getBoardHeight()
+    const result = []
+    for (let y = 0; y < boardHeight; y++) {
+      for (let x = 0; x < boardWidth; x++) {
+        if (y % 2 == 0 && x % 2 == 0) {
+          result.push({x, y})
+        }
+        if (y % 2 == 1 && x % 2 == 1) {
+          result.push({x, y})
+        }
+      }
+    }
+    function shuffle(array) {
+      let currentIndex = array.length,  randomIndex;
+    
+      // While there remain elements to shuffle.
+      while (currentIndex != 0) {
+    
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+    
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+          array[randomIndex], array[currentIndex]];
+      }
+    
+      return array;
+    }
+    shuffle(result);
+    // Suffle
+    return result
+  }
+  printBoard(board: Map<string, string>, boardWidth: number, boardHeight: number) {
     for (let y = boardHeight - 1; y >= 0; y--) {
       process.stdout.write(y + '  ')
       for (let x = 0; x < boardWidth; x++) {
@@ -100,16 +200,42 @@ export class PlaceShipService {
         // if(x>=10) space = '  '
         if (board.get('' + x + y) == COORDINATE_STATUS.WATER) {
           process.stdout.write('_' + space)
+          continue
         }
         if (board.get('' + x + y) == COORDINATE_STATUS.SHOT) {
           process.stdout.write('O' + space)
+          continue
+        }
+        if (board.get('' + x + y) == SHIP_TYPE.DD) {
+          process.stdout.write('D' + space)
+          continue
+        }
+        if (board.get('' + x + y) == SHIP_TYPE.BB) {
+          process.stdout.write('B' + space)
+          continue
+        }
+        if (board.get('' + x + y) == SHIP_TYPE.CA) {
+          process.stdout.write('A' + space)
+          continue
+        }
+        if (board.get('' + x + y) == SHIP_TYPE.CV) {
+          process.stdout.write('C' + space)
+          continue
+        }
+        if (board.get('' + x + y) == SHIP_TYPE.OR) {
+          process.stdout.write('R' + space)
+          continue
         }
         if (board.get('' + x + y) == COORDINATE_STATUS.SHIP) {
           process.stdout.write('S' + space)
+          continue
         }
         if (board.get('' + x + y) == COORDINATE_STATUS.SUNK) {
           process.stdout.write('X' + space)
+          continue
         }
+        process.stdout.write(board.get('' + x + y) + space)
+        continue
       }
       console.log('');
       console.log('');

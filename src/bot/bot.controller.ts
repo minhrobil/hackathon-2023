@@ -24,6 +24,7 @@ export class BotController {
     try {
       const session: string = headers['x-session-id']
       const data = await this.botService.invite(inviteDto, session)
+      console.log("/invite", data);
       return res.json(data)
     } catch (error) {
       console.log(error);
@@ -36,6 +37,7 @@ export class BotController {
     try {
       const session: string = headers['x-session-id']
       const data = this.botService.placeShips(placeShipDto, session);
+      console.log("/place-ships", data);
       return res.json(data)
     } catch (error) {
       console.log(error);
@@ -48,6 +50,7 @@ export class BotController {
     try {
       const session: string = headers['x-session-id']
       const data = this.botService.shoot(shootDto, session);
+      console.log("/shoot", data);
       return res.json(data)
     } catch (error) {
       console.log(error);
@@ -58,6 +61,7 @@ export class BotController {
   @UseInterceptors(HeaderInterceptor)
   notify(@Body() notifyDto: NotifyDto, @Headers() headers: HeaderDto, @Res() res: Response) {
     try {
+      console.log("/notify-from", notifyDto.playerId);
       const session: string = headers['x-session-id']
       const data = this.botService.notify(notifyDto, session);
       return res.json(data)
@@ -70,6 +74,9 @@ export class BotController {
   @UseInterceptors(HeaderInterceptor)
   gameOver(@Body() gameOverDto: GameOverDto, @Headers() headers: HeaderDto, @Res() res: Response) {
     try {
+      console.log("GAME OVER!!!!", gameOverDto.statistics);
+      console.log("WINNER ", gameOverDto.winner);
+      console.log("LOSER", gameOverDto.loser);
       const session: string = headers['x-session-id']
       const data = this.botService.gameOver(gameOverDto, session);
       return res.json(data)
