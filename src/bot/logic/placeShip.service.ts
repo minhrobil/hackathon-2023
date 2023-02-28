@@ -111,8 +111,39 @@ export class PlaceShipService {
         huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
       });
     }
+    if (currentTactic === TACTIC.DOG) {
+      const coordinates = this.makeCoordinatesDog(game)
+      coordinates.forEach(coordinate => {
+        huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
+      });
+    }
   }
-
+  makeCoordinatesDog(game: Game) {
+    const boardWidth = game.getBoardWidth()
+    const boardHeight = game.getBoardHeight()
+    const result = []
+    for (let y = 0; y < boardHeight/2; y++) {
+      for (let x = 0; x < boardWidth; x++) {
+        if (y % 2 == 0 && x % 2 == 0) {
+          result.push({x, y})
+        }
+        if (y % 2 == 1 && x % 2 == 1) {
+          result.push({x, y})
+        }
+      }
+    }
+    for (let y = boardHeight-1; y >= boardHeight/2; y--) {
+      for (let x = boardWidth -1; x >= 0; x--) {
+        if (y % 2 == 0 && x % 2 == 0) {
+          result.push({x, y})
+        }
+        if (y % 2 == 1 && x % 2 == 1) {
+          result.push({x, y})
+        }
+      }
+    }
+    return result
+  }
   makeCoordinatesSnake(game: Game) {
     const boardWidth = game.getBoardWidth()
     const boardHeight = game.getBoardHeight()
