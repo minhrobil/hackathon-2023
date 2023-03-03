@@ -196,10 +196,10 @@ export class ShootService {
     } else {
       game.setCurrentMission(MISSION_TYPE.TARGETING)
     }
-    console.log("targetShotQueue", game.getTargetShotQueue());
-    console.log("shipCoordinatesInCurrentTargetArea", game.getShipCoordinatesInCurrentTargetArea());
-    console.log("shipsInEnermyBoard", game.getShipsInEnermyBoard());
-    console.log("CurrentMission", game.getCurrentMission());
+    // console.log("targetShotQueue", game.getTargetShotQueue());
+    // console.log("shipCoordinatesInCurrentTargetArea", game.getShipCoordinatesInCurrentTargetArea());
+    // console.log("shipsInEnermyBoard", game.getShipsInEnermyBoard());
+    // console.log("CurrentMission", game.getCurrentMission());
   }
   findNewTargetAreaInMap(game: Game) {
     const enemyBoard = game.getEnemyBoard()

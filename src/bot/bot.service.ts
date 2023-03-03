@@ -38,10 +38,7 @@ export class BotService {
     }
   }
   async invite(inviteDto: InviteDto, session: string) {
-    console.log("gameBeforeDelete", this.games);
     this.deleteOldGames()
-    console.log("gameAfterDelete", this.games);
-
     if (this.games.has(session)) {
       return { success: false }
     }
@@ -147,8 +144,12 @@ export class BotService {
   deleteOldGames(){
     const gameSessionOlds = []
     this.games.forEach(game=>{
-      if(moment().diff(game.getLastAccess(),'minutes') > 10){
+      if(process.env.ENV == 'DEBUG'){
         gameSessionOlds.push(game.getSession())
+      }else{
+        if(moment().diff(game.getLastAccess(),'minutes') > 10){
+          gameSessionOlds.push(game.getSession())
+        }
       }
     })
     gameSessionOlds.forEach(session => {
