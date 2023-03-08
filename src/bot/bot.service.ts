@@ -11,6 +11,8 @@ import { Game } from './logic/game.service';
 import { MyShipsDto } from './dto/myShips.dto';
 import axios, { AxiosResponse } from 'axios'
 import * as moment from "moment";
+import { Notify2Dto } from './dto/notify2.dto';
+import { Coordinate } from './entities/coordinate.entity';
 @Injectable()
 export class BotService {
   constructor(
@@ -19,13 +21,14 @@ export class BotService {
   ) { }
 
   private games: Map<string, Game> = new Map()
-  getGameBySession(session: string){
+  getGameBySession(session: string) {
     const game = this.games.get(session);
-    if(game){
+    if (game) {
       game.setLastAccess(moment())
     }
     return game
   }
+
   async getShipsPlaceJava(inviteDto: InviteDto): Promise<AxiosResponse> {
     try {
       return await axios.post(process.env.URI_PLACE_SHIP, inviteDto, {
@@ -129,25 +132,38 @@ export class BotService {
     }
     this.shootService.updateShotResult(notifyDto, game)
     this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
+    console.log("Huntshot remain: ", game.getHuntShotQueue().size())
     return { success: true };
+  }
+
+  notify2(i: number, j: number) {
+    try {
+      this.games.forEach((game) => {
+        const huntingQueue = game.getHuntShotQueue();
+        huntingQueue.pushToTop(new Coordinate(i, j))
+        console.log("Huntshot remain after push to top: ", huntingQueue.size())
+      })
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   gameOver(gameOverDto: GameOverDto, session: string) {
     const game = this.getGameBySession(session)
     if (!game) {
       return { success: false }
-    }else{
+    } else {
       this.games.delete(session)
     }
     return { success: true };
   }
-  deleteOldGames(){
+  deleteOldGames() {
     const gameSessionOlds = []
-    this.games.forEach(game=>{
-      if(process.env.ENV == 'DEBUG'){
+    this.games.forEach(game => {
+      if (process.env.ENV == 'DEBUG') {
         gameSessionOlds.push(game.getSession())
-      }else{
-        if(moment().diff(game.getLastAccess(),'minutes') > 10){
+      } else {
+        if (moment().diff(game.getLastAccess(), 'minutes') > 10) {
           gameSessionOlds.push(game.getSession())
         }
       }

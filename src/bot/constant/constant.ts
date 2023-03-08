@@ -3,7 +3,8 @@ export const TACTIC = {
     WOLF: "WOLF", //Chiến thuật Wolf
     SNAKE: "SNAKE", //Chien thuat Snake
     CAT: "CAT", //Chien thuat Cat
-    DOG: "DOG" //Chien thuat Cat
+    DOG: "DOG", //Chien thuat Cat
+    NHU1: "NHU1" //Chien thuat Cat
 }
 export const COORDINATE_STATUS = {
     WATER: "1", //Chưa bắn vào ô này

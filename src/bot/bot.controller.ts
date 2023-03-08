@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Headers, Res, UseInterceptors, HttpStatus, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers, Res, UseInterceptors, HttpStatus, HttpCode, Param } from '@nestjs/common';
 import { BotService } from './bot.service';
 import { InviteDto } from './dto/invite.dto';
 import { PlaceShipDto } from './dto/place-ship.dto';
 import { ShootDto } from './dto/shoot.dto';
 import { NotifyDto } from './dto/notify.dto';
+import { Notify2Dto } from './dto/notify2.dto';
 import { GameOverDto } from './dto/game-over.dto';
 import { HeaderInterceptor } from './bot.interceptor';
 import { Response } from 'express';
@@ -65,6 +66,17 @@ export class BotController {
       const session: string = headers['x-session-id']
       const data = this.botService.notify(notifyDto, session);
       return res.json(data)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get("/notify2/:p")
+  notify2(@Param('p') p: string, @Res() res: Response) {
+    try {
+      const ps = p.split(',')
+      this.botService.notify2(parseInt(ps[0]), parseInt(ps[1]));
+      return res.json("OK")
     } catch (error) {
       console.log(error);
     }

@@ -1,0 +1,1 @@
+export const COORDINATE_NHU1_TATIC = [{x:1,y:0},{x:1,y:1},{x:0,y:3},{x:10,y:3},{x:11,y:3},{x:18,y:0},{x:3,y:2}]

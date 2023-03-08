@@ -6,6 +6,7 @@ import { MyShipsDto } from '../dto/myShips.dto';
 import { COORDINATE_TIGER_TATIC } from '../constant/coordinate.tiger.tatic';
 import { Game } from './game.service';
 import { COORDINATE_CAT_TACTIC } from '../constant/coordinate.cat.tatic';
+import { COORDINATE_NHU1_TATIC } from '../constant/coordinate.nhu1.tatic';
 
 @Injectable()
 export class PlaceShipService {
@@ -117,6 +118,53 @@ export class PlaceShipService {
         huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
       });
     }
+    if (currentTactic === TACTIC.NHU1) {
+      const coordinates = this.makeCoordinatesNhu1(game)
+      coordinates.forEach(coordinate => {
+        huntShotQueue.push(new Coordinate(coordinate.x, coordinate.y))
+      });
+    }
+  }
+  makeCoordinatesNhu1(game: Game) {
+    const boardWidth = game.getBoardWidth()
+    const boardHeight = game.getBoardHeight()
+    const result = []
+    for (let y = 0; y < boardHeight; y++) {
+      for (let x = 0; x < boardWidth; x++) {
+        if (y % 2 == 0 && x % 2 == 0) {
+          const findInNhu1 = COORDINATE_NHU1_TATIC.findIndex(e=>e.x == x && e.y == y) >= 0
+          if(!findInNhu1){
+            result.push({x, y})
+          }
+        }
+        if (y % 2 == 1 && x % 2 == 1) {
+          const findInNhu1 = COORDINATE_NHU1_TATIC.findIndex(e=>e.x == x && e.y == y) >= 0
+          if(!findInNhu1){
+            result.push({x, y})
+          }
+        }
+      }
+    }
+    function shuffle(array) {
+      let currentIndex = array.length,  randomIndex;
+    
+      // While there remain elements to shuffle.
+      while (currentIndex != 0) {
+    
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+    
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+          array[randomIndex], array[currentIndex]];
+      }
+    
+      return array;
+    }
+    shuffle(result);
+    // Suffle
+    return [...COORDINATE_NHU1_TATIC,...result]
   }
   makeCoordinatesDog(game: Game) {
     const boardWidth = game.getBoardWidth()
