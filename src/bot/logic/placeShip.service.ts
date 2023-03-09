@@ -7,6 +7,36 @@ import { COORDINATE_TIGER_TATIC } from '../constant/coordinate.tiger.tatic';
 import { Game } from './game.service';
 import { COORDINATE_CAT_TACTIC } from '../constant/coordinate.cat.tatic';
 import { COORDINATE_NHU1_TATIC } from '../constant/coordinate.nhu1.tatic';
+import {
+  makeCV1Coordinate,
+  makeCV2Coordinate,
+  makeCV3Coordinate,
+  makeCV4Coordinate,
+  makeCV5Coordinate,
+  makeCV6Coordinate,
+  makeCV7Coordinate,
+  makeCV8Coordinate,
+  makeBB1Coordinate,
+  makeBB2Coordinate,
+  makeBB3Coordinate,
+  makeBB4Coordinate,
+  makeBB5Coordinate,
+  makeBB6Coordinate,
+  makeBB7Coordinate,
+  makeBB8Coordinate,
+  makeOR1Coordinate,
+  makeOR2Coordinate,
+  makeOR3Coordinate,
+  makeOR4Coordinate,
+  makeCA1Coordinate,
+  makeCA2Coordinate,
+  makeCA3Coordinate,
+  makeCA4Coordinate,
+  makeCA5Coordinate,
+  makeCA6Coordinate,
+  makeDD1Coordinate,
+  makeDD2Coordinate,
+} from '../constant/coordinate.ship.tatic';
 
 @Injectable()
 export class PlaceShipService {
@@ -17,6 +47,11 @@ export class PlaceShipService {
         enemyBoard.set('' + x + y, COORDINATE_STATUS.WATER)
       }
     }
+    // const ship = makeDD2Coordinate()
+    // ship.forEach(e => {
+    //   enemyBoard.set('' + e.x + e.y, COORDINATE_STATUS.SHIP)
+    // })
+
     // two1 
     // enemyBoard.set('164', COORDINATE_STATUS.SHIP)
     // enemyBoard.set('174', COORDINATE_STATUS.SHIP)
@@ -132,61 +167,61 @@ export class PlaceShipService {
     for (let y = 0; y < boardHeight; y++) {
       for (let x = 0; x < boardWidth; x++) {
         if (y % 2 == 0 && x % 2 == 0) {
-          const findInNhu1 = COORDINATE_NHU1_TATIC.findIndex(e=>e.x == x && e.y == y) >= 0
-          if(!findInNhu1){
-            result.push({x, y})
+          const findInNhu1 = COORDINATE_NHU1_TATIC.findIndex(e => e.x == x && e.y == y) >= 0
+          if (!findInNhu1) {
+            result.push({ x, y })
           }
         }
         if (y % 2 == 1 && x % 2 == 1) {
-          const findInNhu1 = COORDINATE_NHU1_TATIC.findIndex(e=>e.x == x && e.y == y) >= 0
-          if(!findInNhu1){
-            result.push({x, y})
+          const findInNhu1 = COORDINATE_NHU1_TATIC.findIndex(e => e.x == x && e.y == y) >= 0
+          if (!findInNhu1) {
+            result.push({ x, y })
           }
         }
       }
     }
     function shuffle(array) {
-      let currentIndex = array.length,  randomIndex;
-    
+      let currentIndex = array.length, randomIndex;
+
       // While there remain elements to shuffle.
       while (currentIndex != 0) {
-    
+
         // Pick a remaining element.
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
-    
+
         // And swap it with the current element.
         [array[currentIndex], array[randomIndex]] = [
           array[randomIndex], array[currentIndex]];
       }
-    
+
       return array;
     }
     shuffle(result);
     // Suffle
-    return [...COORDINATE_NHU1_TATIC,...result]
+    return [...COORDINATE_NHU1_TATIC, ...result]
   }
   makeCoordinatesDog(game: Game) {
     const boardWidth = game.getBoardWidth()
     const boardHeight = game.getBoardHeight()
     const result = []
-    for (let y = 0; y < boardHeight/2; y++) {
+    for (let y = 0; y < boardHeight / 2; y++) {
       for (let x = 0; x < boardWidth; x++) {
         if (y % 2 == 0 && x % 2 == 0) {
-          result.push({x, y})
+          result.push({ x, y })
         }
         if (y % 2 == 1 && x % 2 == 1) {
-          result.push({x, y})
+          result.push({ x, y })
         }
       }
     }
-    for (let y = boardHeight-1; y >= boardHeight/2; y--) {
-      for (let x = boardWidth -1; x >= 0; x--) {
+    for (let y = boardHeight - 1; y >= boardHeight / 2; y--) {
+      for (let x = boardWidth - 1; x >= 0; x--) {
         if (y % 2 == 0 && x % 2 == 0) {
-          result.push({x, y})
+          result.push({ x, y })
         }
         if (y % 2 == 1 && x % 2 == 1) {
-          result.push({x, y})
+          result.push({ x, y })
         }
       }
     }
@@ -199,10 +234,10 @@ export class PlaceShipService {
     for (let y = 0; y < boardHeight; y++) {
       for (let x = 0; x < boardWidth; x++) {
         if (y % 2 == 0 && x % 2 == 0) {
-          result.push({x, y})
+          result.push({ x, y })
         }
         if (y % 2 == 1 && x % 2 == 1) {
-          result.push({x, y})
+          result.push({ x, y })
         }
       }
     }
@@ -214,22 +249,22 @@ export class PlaceShipService {
     const result = [...COORDINATE_CAT_TACTIC]
     const checked = new Set()
     result.forEach(element => {
-      const keyCheck = ''+element.x+element.y
+      const keyCheck = '' + element.x + element.y
       checked.add(keyCheck)
     });
     for (let y = 0; y < boardHeight; y++) {
       for (let x = 0; x < boardWidth; x++) {
-        const keyCheck = ''+x+y
+        const keyCheck = '' + x + y
         if (y % 2 == 0 && x % 2 == 0) {
           if (!checked.has(keyCheck)) {
             checked.add(keyCheck)
-            result.push({x, y})
+            result.push({ x, y })
           }
         }
         if (y % 2 == 1 && x % 2 == 1) {
           if (!checked.has(keyCheck)) {
             checked.add(keyCheck)
-            result.push({x, y})
+            result.push({ x, y })
           }
         }
       }
@@ -243,28 +278,28 @@ export class PlaceShipService {
     for (let y = 0; y < boardHeight; y++) {
       for (let x = 0; x < boardWidth; x++) {
         if (y % 2 == 0 && x % 2 == 0) {
-          result.push({x, y})
+          result.push({ x, y })
         }
         if (y % 2 == 1 && x % 2 == 1) {
-          result.push({x, y})
+          result.push({ x, y })
         }
       }
     }
     function shuffle(array) {
-      let currentIndex = array.length,  randomIndex;
-    
+      let currentIndex = array.length, randomIndex;
+
       // While there remain elements to shuffle.
       while (currentIndex != 0) {
-    
+
         // Pick a remaining element.
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
-    
+
         // And swap it with the current element.
         [array[currentIndex], array[randomIndex]] = [
           array[randomIndex], array[currentIndex]];
       }
-    
+
       return array;
     }
     shuffle(result);

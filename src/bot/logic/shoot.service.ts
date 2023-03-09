@@ -5,8 +5,36 @@ import { Game } from './game.service';
 import { COORDINATE_STATUS, EMPTY_SHAPE_AREA_TYPE, FOUR_SHAPE_AREA_TYPE, MAX_SHOOT, MIN_SHOOT, MISSION_TYPE, MULTIPLE_SHAPE_AREA_TYPE, MY_PLAYER_ID, SHIP_FINDING_STATUS, SHIP_TYPE, SMART_MODE, STATUS_SHOT, THREE_SHAPE_AREA_TYPE, TWO_SHAPE_AREA_TYPE } from '../constant/constant';
 import { NotifyDto } from '../dto/notify.dto';
 import { Shape } from '../entities/shape.entity';
-import { makeBBCoordinate, makeCACoordinate, makeCVCoordinate, makeDDCoordinate, makeORCoordinate } from '../constant/coordinate.ship.tatic';
-
+import {
+  makeCV1Coordinate,
+  makeCV2Coordinate,
+  makeCV3Coordinate,
+  makeCV4Coordinate,
+  makeCV5Coordinate,
+  makeCV6Coordinate,
+  makeCV7Coordinate,
+  makeCV8Coordinate,
+  makeBB1Coordinate,
+  makeBB2Coordinate,
+  makeBB3Coordinate,
+  makeBB4Coordinate,
+  makeBB5Coordinate,
+  makeBB6Coordinate,
+  makeBB7Coordinate,
+  makeBB8Coordinate,
+  makeOR1Coordinate,
+  makeOR2Coordinate,
+  makeOR3Coordinate,
+  makeOR4Coordinate,
+  makeCA1Coordinate,
+  makeCA2Coordinate,
+  makeCA3Coordinate,
+  makeCA4Coordinate,
+  makeCA5Coordinate,
+  makeCA6Coordinate,
+  makeDD1Coordinate,
+  makeDD2Coordinate,
+} from '../constant/coordinate.ship.tatic';
 @Injectable()
 export class ShootService {
   huntShip(shootDto: ShootDto, game: Game) {
@@ -206,67 +234,213 @@ export class ShootService {
       }
     })
   }
-
+  getHuntCV = (game: Game) => {
+    const CV1Coordinate = makeCV1Coordinate()
+    const CV2Coordinate = makeCV2Coordinate()
+    const CV3Coordinate = makeCV3Coordinate()
+    const CV4Coordinate = makeCV4Coordinate()
+    const CV5Coordinate = makeCV5Coordinate()
+    const CV6Coordinate = makeCV6Coordinate()
+    const CV7Coordinate = makeCV7Coordinate()
+    const CV8Coordinate = makeCV8Coordinate()
+    const T = [
+      CV1Coordinate,
+      CV2Coordinate,
+      CV3Coordinate,
+      CV4Coordinate,
+      CV5Coordinate,
+      CV6Coordinate,
+      CV7Coordinate,
+      CV8Coordinate,
+    ]
+    let minlength = 160
+    let maxlength = 0
+    let minIndex = 8
+    for (let i = 0; i < T.length; i++) {
+      let already = 0
+      for (let j = 0; j < T[i].length; j++) {
+        if (!this.isCoordinateAvailableForShot(T[i][j], game)) {
+          already++;
+        }
+      }
+      if(T[i].length - already > maxlength){
+        maxlength = T[i].length - already
+      }
+      if(T[i].length - already < minlength){
+        minlength = T[i].length - already
+        minIndex = i
+      }
+    }
+    console.log("minlengthCV = ", minlength, "maxlengthCV = ", maxlength);
+    return T[minIndex]
+  }
+  getHuntBB = (game: Game) => {
+    const BB1Coordinate = makeBB1Coordinate()
+    const BB2Coordinate = makeBB2Coordinate()
+    const BB3Coordinate = makeBB3Coordinate()
+    const BB4Coordinate = makeBB4Coordinate()
+    const BB5Coordinate = makeBB5Coordinate()
+    const BB6Coordinate = makeBB6Coordinate()
+    const BB7Coordinate = makeBB7Coordinate()
+    const BB8Coordinate = makeBB8Coordinate()
+    const T = [
+      BB1Coordinate,
+      BB2Coordinate,
+      BB3Coordinate,
+      BB4Coordinate,
+      BB5Coordinate,
+      BB6Coordinate,
+      BB7Coordinate,
+      BB8Coordinate,
+    ]
+    let minlength = 160
+    let maxlength = 0
+    let minIndex = 8
+    for (let i = 0; i < T.length; i++) {
+      let already = 0
+      for (let j = 0; j < T[i].length; j++) {
+        if (!this.isCoordinateAvailableForShot(T[i][j], game)) {
+          already++;
+        }
+      }
+      if(T[i].length - already > maxlength){
+        maxlength = T[i].length - already
+      }
+      if(T[i].length - already < minlength){
+        minlength = T[i].length - already
+        minIndex = i
+      }
+    }
+    console.log("minlengthBB = ", minlength, "maxlengthBB = ", maxlength);
+    return T[minIndex]
+  }
+  getHuntOR = (game: Game) => {
+    const OR1Coordinate = makeOR1Coordinate()
+    const OR2Coordinate = makeOR2Coordinate()
+    const OR3Coordinate = makeOR3Coordinate()
+    const OR4Coordinate = makeOR4Coordinate()
+    const T = [
+      OR1Coordinate,
+      OR2Coordinate,
+      OR3Coordinate,
+      OR4Coordinate,
+    ]
+    let minlength = 160
+    let maxlength = 0
+    let minIndex = 8
+    for (let i = 0; i < T.length; i++) {
+      let already = 0
+      for (let j = 0; j < T[i].length; j++) {
+        if (!this.isCoordinateAvailableForShot(T[i][j], game)) {
+          already++;
+        }
+      }
+      if(T[i].length - already > maxlength){
+        maxlength = T[i].length - already
+      }
+      if(T[i].length - already < minlength){
+        minlength = T[i].length - already
+        minIndex = i
+      }
+    }
+    console.log("minlengthOR = ", minlength, "maxlengthOR = ", maxlength);
+    return T[minIndex]
+  }
+  getHuntCA = (game: Game) => {
+    const CA1Coordinate = makeCA1Coordinate()
+    const CA2Coordinate = makeCA2Coordinate()
+    const CA3Coordinate = makeCA3Coordinate()
+    const CA4Coordinate = makeCA4Coordinate()
+    const CA5Coordinate = makeCA5Coordinate()
+    const CA6Coordinate = makeCA6Coordinate()
+    const T = [
+      CA1Coordinate,
+      CA2Coordinate,
+      CA3Coordinate,
+      CA4Coordinate,
+      CA5Coordinate,
+      CA6Coordinate
+    ]
+    let minlength = 160
+    let maxlength = 0
+    let minIndex = 8
+    for (let i = 0; i < T.length; i++) {
+      let already = 0
+      for (let j = 0; j < T[i].length; j++) {
+        if (!this.isCoordinateAvailableForShot(T[i][j], game)) {
+          already++;
+        }
+      }
+      if(T[i].length - already > maxlength){
+        maxlength = T[i].length - already
+      }
+      if(T[i].length - already < minlength){
+        minlength = T[i].length - already
+        minIndex = i
+      }
+    }
+    console.log("minlengthCA = ", minlength, "maxlengthCA = ", maxlength);
+    return T[minIndex]
+  }
+  getHuntDD = (game: Game) => {
+    const DD1Coordinate = makeDD1Coordinate()
+    const DD2Coordinate = makeDD2Coordinate()
+    const T = [
+      DD1Coordinate,
+      DD2Coordinate,
+    ]
+    let minlength = 160
+    let maxlength = 0
+    let minIndex = 8
+    for (let i = 0; i < T.length; i++) {
+      let already = 0
+      for (let j = 0; j < T[i].length; j++) {
+        if (!this.isCoordinateAvailableForShot(T[i][j], game)) {
+          already++;
+        }
+      }
+      if(T[i].length - already > maxlength){
+        maxlength = T[i].length - already
+      }
+      if(T[i].length - already < minlength){
+        minlength = T[i].length - already
+        minIndex = i
+      }
+    }
+    console.log("minlengthDD = ", minlength, "maxlengthDD = ", maxlength);
+    return T[minIndex]
+  }
   buildHuntShotQueue(game: Game) {
     const huntShotQueue = game.getHuntShotQueue()
     const checked = new Set()
     huntShotQueue.clear()
+    let CV: Coordinate[] = []
+    let BB: Coordinate[] = []
+    let OR: Coordinate[] = []
+    let CA: Coordinate[] = []
+    let DD: Coordinate[] = []
     const isRemainCV = this.isRemainCV(game)
     const isRemainBB = this.isRemainBB(game)
     const isRemainCA = this.isRemainCA(game)
     const isRemainOR = this.isRemainOR(game)
     const isRemainDD = this.isRemainDD(game)
-    const CVCoordinate = makeCVCoordinate()
-    const BBCoordinate = makeBBCoordinate()
-    const CACoordinate = makeCACoordinate()
-    const ORCoordinate = makeORCoordinate()
-    const DDCoordinate = makeDDCoordinate()
     if (isRemainCV) {
-      CVCoordinate.forEach(coordinate => {
-        const keyCheck = '' + coordinate.x + coordinate.y
-        if (!checked.has(keyCheck)) {
-          checked.add(keyCheck)
-          if (this.isCoordinateAvailableForShot(coordinate, game)) {
-            huntShotQueue.push(coordinate)
-          }
-        }
-      });
+      CV = [...this.getHuntCV(game)]
     }
     if (isRemainBB) {
-      BBCoordinate.forEach(coordinate => {
-        const keyCheck = '' + coordinate.x + coordinate.y
-        if (!checked.has(keyCheck)) {
-          checked.add(keyCheck)
-          if (this.isCoordinateAvailableForShot(coordinate, game)) {
-            huntShotQueue.push(coordinate)
-          }
-        }
-      });
+      BB = [...this.getHuntBB(game)]
     }
     if (isRemainOR) {
-      ORCoordinate.forEach(coordinate => {
-        const keyCheck = '' + coordinate.x + coordinate.y
-        if (!checked.has(keyCheck)) {
-          checked.add(keyCheck)
-          if (this.isCoordinateAvailableForShot(coordinate, game)) {
-            huntShotQueue.push(coordinate)
-          }
-        }
-      });
+      OR = [...this.getHuntOR(game)]
     }
     if (isRemainCA) {
-      CACoordinate.forEach(coordinate => {
-        const keyCheck = '' + coordinate.x + coordinate.y
-        if (!checked.has(keyCheck)) {
-          checked.add(keyCheck)
-          if (this.isCoordinateAvailableForShot(coordinate, game)) {
-            huntShotQueue.push(coordinate)
-          }
-        }
-      });
+      CA = [...this.getHuntCA(game)]
     }
     if (isRemainDD) {
-      DDCoordinate.forEach(coordinate => {
+      DD = [...this.getHuntDD(game)]
+    }
+    let full = [...CV, ...BB, ...OR, ...CA, ...DD]
+    full.forEach(coordinate => {
         const keyCheck = '' + coordinate.x + coordinate.y
         if (!checked.has(keyCheck)) {
           checked.add(keyCheck)
@@ -275,7 +449,6 @@ export class ShootService {
           }
         }
       });
-    }
     console.log("huntShotQueue", huntShotQueue.size());
   }
   updateCurrentMission(game: Game) {
