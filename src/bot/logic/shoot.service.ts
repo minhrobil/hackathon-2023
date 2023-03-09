@@ -5,6 +5,7 @@ import { Game } from './game.service';
 import { COORDINATE_STATUS, EMPTY_SHAPE_AREA_TYPE, FOUR_SHAPE_AREA_TYPE, MAX_SHOOT, MIN_SHOOT, MISSION_TYPE, MULTIPLE_SHAPE_AREA_TYPE, MY_PLAYER_ID, SHIP_FINDING_STATUS, SHIP_TYPE, SMART_MODE, STATUS_SHOT, THREE_SHAPE_AREA_TYPE, TWO_SHAPE_AREA_TYPE } from '../constant/constant';
 import { NotifyDto } from '../dto/notify.dto';
 import { Shape } from '../entities/shape.entity';
+import { makeBBCoordinate, makeCACoordinate, makeCVCoordinate, makeDDCoordinate, makeORCoordinate } from '../constant/coordinate.ship.tatic';
 
 @Injectable()
 export class ShootService {
@@ -29,8 +30,12 @@ export class ShootService {
       }
     } else {
       //Kiem tra gia tri queue pop co the ban khong, neu co thi lay ra ban, neu khong thi loai bo
-      const combo = shootDto.maxShots + numRemainShip - 1 < parseInt(process.env.COMBO) ? shootDto.maxShots : parseInt(process.env.COMBO)
-      const isUseCommbo = process.env.COMBO_WHEN == MISSION_TYPE.HUNTING && shootDto.maxShots == combo
+      let combo = shootDto.maxShots + numRemainShip - 1 < parseInt(process.env.COMBO) ? shootDto.maxShots : parseInt(process.env.COMBO)
+      let isUseCommbo = process.env.COMBO_WHEN == MISSION_TYPE.HUNTING && shootDto.maxShots == combo
+      if (numRemainShip == 1 || this.getMyNumRemainShip(game) <= numRemainShip) {
+        combo = shootDto.maxShots
+        isUseCommbo = true
+      }
       if (isUseCommbo) {
         while (huntShotQueue.size() > 0 && result.length < combo) {
           if (this.isCoordinateAvailableForShot(huntShotQueue.peek(), game)) {
@@ -76,7 +81,7 @@ export class ShootService {
         } else {
           targetShotQueue.pop()
         }
-      } 
+      }
       // Con lai bao nhieu diem con thieu thi lay tu trong huntingQueue ra
       const missingAfterTarget = MAX_SHOOT - result.length
       for (let i = 1; i <= missingAfterTarget; i++) {
@@ -94,7 +99,7 @@ export class ShootService {
       //Kiem tra gia tri queue pop co the ban khong, neu co thi lay ra ban, neu khong thi loai bo
       let combo = shootDto.maxShots + numRemainShip - 1 < parseInt(process.env.COMBO) ? shootDto.maxShots : parseInt(process.env.COMBO)
       let isUseCommbo = process.env.COMBO_WHEN == MISSION_TYPE.TARGETING && shootDto.maxShots == combo
-      if(numRemainShip == 1){
+      if (numRemainShip == 1 || this.getMyNumRemainShip(game) <= numRemainShip) {
         combo = shootDto.maxShots
         isUseCommbo = true
       }
@@ -147,8 +152,22 @@ export class ShootService {
   }
   updateShotResult(notifyDto: NotifyDto, game: Game) {
     if (notifyDto.playerId != MY_PLAYER_ID) {
+      const shipsInMyBoard = game.getShipsInMyBoard()
+      notifyDto.sunkShips.forEach(sunkShip => {
+        const myShipIndex = shipsInMyBoard.ships.findIndex((ship) => {
+          if (ship.status != SHIP_FINDING_STATUS.KILLED && ship.type == sunkShip.type) {
+            return true
+          }
+          return false
+        })
+        if (myShipIndex >= 0) {
+          // Update con tàu mới chìm thành killed
+          shipsInMyBoard.ships[myShipIndex].status = SHIP_FINDING_STATUS.KILLED
+          shipsInMyBoard.ships[myShipIndex].coordinates = sunkShip.coordinates
+        }
+      })
       return
-    } 
+    }
     const enemyBoard = game.getEnemyBoard()
     const shipsInEnermyBoard = game.getShipsInEnermyBoard()
     notifyDto.shots.forEach(shot => {
@@ -160,9 +179,9 @@ export class ShootService {
       if (shot.status == STATUS_SHOT.MISS) {
         // Nếu bắn trượt thì set toạ độ = shot
         const current = enemyBoard.get(key_coordinate)
-        if(current != COORDINATE_STATUS.WATER){
+        if (current != COORDINATE_STATUS.WATER) {
           enemyBoard.set(key_coordinate, parseInt(current) + 1 + '')
-        }else{
+        } else {
           enemyBoard.set(key_coordinate, COORDINATE_STATUS.SHOT)
         }
       }
@@ -187,9 +206,82 @@ export class ShootService {
       }
     })
   }
+
+  buildHuntShotQueue(game: Game) {
+    const huntShotQueue = game.getHuntShotQueue()
+    const checked = new Set()
+    huntShotQueue.clear()
+    const isRemainCV = this.isRemainCV(game)
+    const isRemainBB = this.isRemainBB(game)
+    const isRemainCA = this.isRemainCA(game)
+    const isRemainOR = this.isRemainOR(game)
+    const isRemainDD = this.isRemainDD(game)
+    const CVCoordinate = makeCVCoordinate()
+    const BBCoordinate = makeBBCoordinate()
+    const CACoordinate = makeCACoordinate()
+    const ORCoordinate = makeORCoordinate()
+    const DDCoordinate = makeDDCoordinate()
+    if (isRemainCV) {
+      CVCoordinate.forEach(coordinate => {
+        const keyCheck = '' + coordinate.x + coordinate.y
+        if (!checked.has(keyCheck)) {
+          checked.add(keyCheck)
+          if (this.isCoordinateAvailableForShot(coordinate, game)) {
+            huntShotQueue.push(coordinate)
+          }
+        }
+      });
+    }
+    if (isRemainBB) {
+      BBCoordinate.forEach(coordinate => {
+        const keyCheck = '' + coordinate.x + coordinate.y
+        if (!checked.has(keyCheck)) {
+          checked.add(keyCheck)
+          if (this.isCoordinateAvailableForShot(coordinate, game)) {
+            huntShotQueue.push(coordinate)
+          }
+        }
+      });
+    }
+    if (isRemainOR) {
+      ORCoordinate.forEach(coordinate => {
+        const keyCheck = '' + coordinate.x + coordinate.y
+        if (!checked.has(keyCheck)) {
+          checked.add(keyCheck)
+          if (this.isCoordinateAvailableForShot(coordinate, game)) {
+            huntShotQueue.push(coordinate)
+          }
+        }
+      });
+    }
+    if (isRemainCA) {
+      CACoordinate.forEach(coordinate => {
+        const keyCheck = '' + coordinate.x + coordinate.y
+        if (!checked.has(keyCheck)) {
+          checked.add(keyCheck)
+          if (this.isCoordinateAvailableForShot(coordinate, game)) {
+            huntShotQueue.push(coordinate)
+          }
+        }
+      });
+    }
+    if (isRemainDD) {
+      DDCoordinate.forEach(coordinate => {
+        const keyCheck = '' + coordinate.x + coordinate.y
+        if (!checked.has(keyCheck)) {
+          checked.add(keyCheck)
+          if (this.isCoordinateAvailableForShot(coordinate, game)) {
+            huntShotQueue.push(coordinate)
+          }
+        }
+      });
+    }
+    console.log("huntShotQueue", huntShotQueue.size());
+  }
   updateCurrentMission(game: Game) {
     const targetShotQueue = game.getTargetShotQueue()
     targetShotQueue.clear()
+    this.buildHuntShotQueue(game)
     this.findNewTargetAreaInMap(game)
     if (game.getShipCoordinatesInCurrentTargetArea().length == 0) {
       game.setCurrentMission(MISSION_TYPE.HUNTING)
@@ -346,7 +438,7 @@ export class ShootService {
         result.push(left)
       } game
     }
-    
+
     return result
   }
   isCoordinateAvailableForShot(coordinate: Coordinate, game: Game): boolean {
@@ -616,6 +708,16 @@ export class ShootService {
     let result = 0
     shipsInEnermyBoard.ships.forEach((ship) => {
       if (ship.status == SHIP_FINDING_STATUS.FINDING) {
+        return result++
+      }
+    })
+    return result
+  }
+  getMyNumRemainShip(game: Game): number {
+    const shipsInMyBoard = game.getShipsInMyBoard()
+    let result = 0
+    shipsInMyBoard.ships.forEach((ship) => {
+      if (ship.status != SHIP_FINDING_STATUS.KILLED) {
         return result++
       }
     })

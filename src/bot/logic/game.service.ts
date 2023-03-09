@@ -16,6 +16,8 @@ export class Game {
     private currentTactic: string;//Chien dich 
     private boardWidth = 0
     private boardHeight = 0
+    private countHunting = 0
+    private countTargeting = 0
     private player1 = ''
     private player2 = ''
     private currentMission: string = MISSION_TYPE.HUNTING; //Mission hiện tại
@@ -47,7 +49,7 @@ export class Game {
 
     /**
      * Getter currentMission
-     * @return {number }
+     * @return {string }
      */
 
     public getCurrentMission(): string {
@@ -56,7 +58,7 @@ export class Game {
 
     /**
      * Setter currentMission
-     * @param {number } value
+     * @param {string } value
      */
     public setCurrentMission(value: string) {
         this.currentMission = value;
@@ -68,6 +70,37 @@ export class Game {
      */
     public getBoardWidth(): number {
         return this.boardWidth;
+    }
+
+    /**
+     * Getter countHunting
+     * @return {number }
+     */
+    public getCountHunting(): number {
+        return this.countHunting;
+    }
+
+    /**
+     * Getter boardWidth
+     * @return {number }
+     */
+    public getCountTargeting(): number {
+        return this.countTargeting;
+    }
+    /**
+     * Setter countTargeting
+     * @param {number } value
+     */
+    public setCountTargeting(value: number) {
+        this.countTargeting = value;
+    }
+
+    /**
+     * Setter countHunting
+     * @param {number } value
+     */
+    public setCountHunting(value: number) {
+        this.countHunting = value;
     }
 
     /**

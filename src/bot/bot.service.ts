@@ -112,6 +112,7 @@ export class BotService {
       } else {
         coordinates = shootTarget
       }
+      game.setCountTargeting(game.getCountTargeting() + coordinates.length)
     }
     if (game.getCurrentMission() === MISSION_TYPE.HUNTING) {
       const shootHunt = this.shootService.huntShip(shootDto, game)
@@ -120,8 +121,13 @@ export class BotService {
       } else {
         coordinates = shootHunt
       }
+      game.setCountHunting(game.getCountHunting() + coordinates.length)
     }
-    this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
+    console.log("getCountHunting", game.getCountHunting());
+    console.log("getCountTargeting", game.getCountTargeting());
+    console.log("total hunt: ", game.getCountHunting() + game.getHuntShotQueue().size());
+
+    // this.placeShipService.printBoard(game.getEnemyBoard(), game.getBoardWidth(), game.getBoardHeight())
     return { coordinates };
   }
 
