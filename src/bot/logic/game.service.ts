@@ -29,6 +29,23 @@ export class Game {
     private shipCoordinatesInCurrentTargetArea: Array<Coordinate> = []//Danh sach cac toa do tau trong vung target hien tai
     private targetShotQueue: Queue<Coordinate> = new Queue()//Queue các toạ độ sẽ đi target trong vung hien tai
     private shipsInEnermyBoard: MyShipsDto = new MyShipsDto()
+    private countAppear: Map<string, number> = new Map()//Bản đồ quân ta
+
+    /**
+     * Getter countAppear
+     * @return {Map<string, number> }
+     */
+	public getCountAppear(): Map<string, number>  {
+		return this.countAppear;
+	}
+
+    /**
+     * Setter countAppear
+     * @param {Map<string, number> } value
+     */
+	public setCountAppear(value: Map<string, number> ) {
+		this.countAppear = value;
+	}
 
       /**
      * Getter currentMission

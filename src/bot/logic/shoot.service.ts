@@ -263,10 +263,10 @@ export class ShootService {
           already++;
         }
       }
-      if(T[i].length - already > maxlength){
+      if (T[i].length - already > maxlength) {
         maxlength = T[i].length - already
       }
-      if(T[i].length - already < minlength){
+      if (T[i].length - already < minlength) {
         minlength = T[i].length - already
         minIndex = i
       }
@@ -303,10 +303,10 @@ export class ShootService {
           already++;
         }
       }
-      if(T[i].length - already > maxlength){
+      if (T[i].length - already > maxlength) {
         maxlength = T[i].length - already
       }
-      if(T[i].length - already < minlength){
+      if (T[i].length - already < minlength) {
         minlength = T[i].length - already
         minIndex = i
       }
@@ -335,10 +335,10 @@ export class ShootService {
           already++;
         }
       }
-      if(T[i].length - already > maxlength){
+      if (T[i].length - already > maxlength) {
         maxlength = T[i].length - already
       }
-      if(T[i].length - already < minlength){
+      if (T[i].length - already < minlength) {
         minlength = T[i].length - already
         minIndex = i
       }
@@ -371,10 +371,10 @@ export class ShootService {
           already++;
         }
       }
-      if(T[i].length - already > maxlength){
+      if (T[i].length - already > maxlength) {
         maxlength = T[i].length - already
       }
-      if(T[i].length - already < minlength){
+      if (T[i].length - already < minlength) {
         minlength = T[i].length - already
         minIndex = i
       }
@@ -399,10 +399,10 @@ export class ShootService {
           already++;
         }
       }
-      if(T[i].length - already > maxlength){
+      if (T[i].length - already > maxlength) {
         maxlength = T[i].length - already
       }
-      if(T[i].length - already < minlength){
+      if (T[i].length - already < minlength) {
         minlength = T[i].length - already
         minIndex = i
       }
@@ -413,6 +413,8 @@ export class ShootService {
   buildHuntShotQueue(game: Game) {
     const huntShotQueue = game.getHuntShotQueue()
     const checked = new Set()
+    const mapAppear: Map<string, number> = new Map()
+
     huntShotQueue.clear()
     let CV: Coordinate[] = []
     let BB: Coordinate[] = []
@@ -426,29 +428,100 @@ export class ShootService {
     const isRemainDD = this.isRemainDD(game)
     if (isRemainCV) {
       CV = [...this.getHuntCV(game)]
+      CV.forEach(element => {
+        const key = '' + element.x + element.y
+        if (mapAppear.has(key)) {
+          mapAppear.set(key, mapAppear.get(key) + 1)
+        } else {
+          mapAppear.set(key, 1)
+        }
+      });
     }
     if (isRemainBB) {
       BB = [...this.getHuntBB(game)]
+      BB.forEach(element => {
+        const key = '' + element.x + element.y
+        if (mapAppear.has(key)) {
+          mapAppear.set(key, mapAppear.get(key) + 1)
+        } else {
+          mapAppear.set(key, 1)
+        }
+      });
     }
     if (isRemainOR) {
       OR = [...this.getHuntOR(game)]
+      OR.forEach(element => {
+        const key = '' + element.x + element.y
+        if (mapAppear.has(key)) {
+          mapAppear.set(key, mapAppear.get(key) + 1)
+        } else {
+          mapAppear.set(key, 1)
+        }
+      });
     }
     if (isRemainCA) {
       CA = [...this.getHuntCA(game)]
+      CA.forEach(element => {
+        const key = '' + element.x + element.y
+        if (mapAppear.has(key)) {
+          mapAppear.set(key, mapAppear.get(key) + 1)
+        } else {
+          mapAppear.set(key, 1)
+        }
+      });
     }
     if (isRemainDD) {
       DD = [...this.getHuntDD(game)]
-    }
-    let full = [...CV, ...BB, ...OR, ...CA, ...DD]
-    full.forEach(coordinate => {
-        const keyCheck = '' + coordinate.x + coordinate.y
-        if (!checked.has(keyCheck)) {
-          checked.add(keyCheck)
-          if (this.isCoordinateAvailableForShot(coordinate, game)) {
-            huntShotQueue.push(coordinate)
-          }
+      DD.forEach(element => {
+        const key = '' + element.x + element.y
+        if (mapAppear.has(key)) {
+          mapAppear.set(key, mapAppear.get(key) + 1)
+        } else {
+          mapAppear.set(key, 1)
         }
       });
+    }
+
+    let full = [...CV, ...BB, ...OR, ...CA, ...DD]
+    let appear1 = []
+    let appear2 = []
+    let appear3 = []
+    let appear4 = []
+    let appear5 = []
+
+    full.forEach(coordinate => {
+      const keyCheck = '' + coordinate.x + coordinate.y
+      if (!checked.has(keyCheck)) {
+        checked.add(keyCheck)
+        if (this.isCoordinateAvailableForShot(coordinate, game)) {
+          if (mapAppear.get(keyCheck) == 1) {
+            appear1.push(coordinate)
+          }
+          if (mapAppear.get(keyCheck) == 2) {
+            appear2.push(coordinate)
+          }
+          if (mapAppear.get(keyCheck) == 3) {
+            appear3.push(coordinate)
+          }
+          if (mapAppear.get(keyCheck) == 4) {
+            appear4.push(coordinate)
+          }
+          if (mapAppear.get(keyCheck) == 5) {
+            appear5.push(coordinate)
+          }
+        }
+      }
+    });
+    let fullAppear = [...appear5, ...appear4, ...appear3, ...appear2, ...appear1]
+    game.setCountAppear(mapAppear)
+    fullAppear.forEach(coordinate => {
+      huntShotQueue.push(coordinate)
+    })
+    console.log("appear5 ", appear5.length);
+    console.log("appear4 ", appear4.length);
+    console.log("appear3 ", appear3.length);
+    console.log("appear2 ", appear2.length);
+    console.log("appear1 ", appear1.length);
     console.log("huntShotQueue", huntShotQueue.size());
   }
   updateCurrentMission(game: Game) {
@@ -577,42 +650,82 @@ export class ShootService {
     return result
   }
   findCoorinatesAvailableAround(coordinate: Coordinate, game: Game): Array<Coordinate> {
+    const countAppear = game.getCountAppear()
     const board = game.getEnemyBoard()
-    let up = null;
-    let down = null;
-    let right = null;
-    let left = null;
-    const result = []
+    let up = {
+      coordinate: null,
+      count: 0
+    };
+    let down = {
+      coordinate: null,
+      count: 0
+    };;
+    let right = {
+      coordinate: null,
+      count: 0
+    };;
+    let left = {
+      coordinate: null,
+      count: 0
+    };;
     if (coordinate.x < game.getBoardWidth() - 1) {
       const new_x = coordinate.x + 1;
-      if (board.get('' + new_x + coordinate.y) === COORDINATE_STATUS.WATER) {
-        right = new Coordinate(new_x, coordinate.y)
-        result.push(right)
+      const key = '' + new_x + coordinate.y
+      if (board.get(key) === COORDINATE_STATUS.WATER) {
+        right.coordinate = new Coordinate(new_x, coordinate.y)
+        right.count = countAppear.has(key) ? countAppear.get(key) : 0
       }
     }
     if (coordinate.y < game.getBoardHeight() - 1) {
       const new_y = coordinate.y + 1;
-      if (board.get('' + coordinate.x + new_y) === COORDINATE_STATUS.WATER) {
-        up = new Coordinate(coordinate.x, new_y)
-        result.push(up)
+      const key = '' + coordinate.x + new_y
+      if (board.get(key) === COORDINATE_STATUS.WATER) {
+        up.coordinate = new Coordinate(coordinate.x, new_y)
+        up.count = countAppear.has(key) ? countAppear.get(key) : 0
       }
     }
     if (coordinate.y > 0) {
       const new_y = coordinate.y - 1;
-      if (board.get('' + coordinate.x + new_y) === COORDINATE_STATUS.WATER) {
-        down = new Coordinate(coordinate.x, new_y)
-        result.push(down)
+      const key = '' + coordinate.x + new_y
+      if (board.get(key) === COORDINATE_STATUS.WATER) {
+        down.coordinate = new Coordinate(coordinate.x, new_y)
+        down.count = countAppear.has(key) ? countAppear.get(key) : 0
       }
     }
     if (coordinate.x > 0) {
       const new_x = coordinate.x - 1;
-      if (board.get('' + new_x + coordinate.y) === COORDINATE_STATUS.WATER) {
-        left = new Coordinate(new_x, coordinate.y)
-        result.push(left)
-      } game
+      const key = '' + new_x + coordinate.y
+      if (board.get(key) === COORDINATE_STATUS.WATER) {
+        left.coordinate = new Coordinate(new_x, coordinate.y)
+        left.count = countAppear.has(key) ? countAppear.get(key) : 0
+      }
     }
-
-    return result
+    const count: {
+      coordinate: any;
+      count: number;
+    }[] = []
+    if (right.coordinate) {
+      count.push(right)
+    }
+    if (up.coordinate) {
+      count.push(up)
+    }
+    if (down.coordinate) {
+      count.push(down)
+    }
+    if (left.coordinate) {
+      count.push(left)
+    }
+    count.sort((a, b) => {
+      if (a.count > b.count) {
+        return 1;
+      }
+      if (a.count < b.count) {
+        return -1;
+      }
+      return 0;
+    });
+    return count.map(e => e.coordinate)
   }
   isCoordinateAvailableForShot(coordinate: Coordinate, game: Game): boolean {
     const board = game.getEnemyBoard()
@@ -825,7 +938,6 @@ export class ShootService {
   }
   getRecommendCoordinate(game: Game): Coordinate | null {
     const { shapeArea, recommends } = this.getShapeAreaAndRecommend(game)
-    console.log("shapeArea", shapeArea);
     if (recommends.length > 0) {
       return recommends[0]
     }
@@ -923,7 +1035,8 @@ export class ShootService {
   checkAllCoordinatesToShip(cases: Coordinate[][], game: Game): { isOK: boolean, recommend: Coordinate } {
     for (let i = 0; i < cases.length; i++) {
       const isCaseOK = cases[i].every(coordinate => {
-        const status = game.getEnemyBoard().get('' + coordinate.x + coordinate.y)
+        const key = '' + coordinate.x + coordinate.y
+        const status = game.getEnemyBoard().get(key)
         if (status == COORDINATE_STATUS.WATER || status == COORDINATE_STATUS.SHIP) {
           return true
         }
