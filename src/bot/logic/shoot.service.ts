@@ -35,6 +35,8 @@ import {
   makeDD1Coordinate,
   makeDD2Coordinate,
 } from '../constant/coordinate.ship.tatic';
+import { COORDINATE_CAT_TACTIC } from '../constant/coordinate.cat.tatic';
+import { COORDINATE_PRIORITY } from '../constant/coordinate.priority';
 @Injectable()
 export class ShootService {
   huntShip(shootDto: ShootDto, game: Game) {
@@ -488,35 +490,60 @@ export class ShootService {
     let appear3 = []
     let appear4 = []
     let appear5 = []
-
+    let priority = []
+    const checkPriority = new Set()
+    COORDINATE_PRIORITY.forEach(priority=>{
+      checkPriority.add(''+priority.x+priority.y)
+    })
     full.forEach(coordinate => {
       const keyCheck = '' + coordinate.x + coordinate.y
       if (!checked.has(keyCheck)) {
         checked.add(keyCheck)
         if (this.isCoordinateAvailableForShot(coordinate, game)) {
-          if (mapAppear.get(keyCheck) == 1) {
-            appear1.push(coordinate)
-          }
-          if (mapAppear.get(keyCheck) == 2) {
-            appear2.push(coordinate)
-          }
-          if (mapAppear.get(keyCheck) == 3) {
-            appear3.push(coordinate)
+          if (mapAppear.get(keyCheck) == 5) {
+            if(checkPriority.has(keyCheck)){
+              priority.push(coordinate)
+            }else{
+              appear5.push(coordinate)
+            }
           }
           if (mapAppear.get(keyCheck) == 4) {
-            appear4.push(coordinate)
+            if(checkPriority.has(keyCheck)){
+              priority.push(coordinate)
+            }else{
+              appear4.push(coordinate)
+            }
           }
-          if (mapAppear.get(keyCheck) == 5) {
-            appear5.push(coordinate)
+          if (mapAppear.get(keyCheck) == 3) {
+            if(checkPriority.has(keyCheck)){
+              priority.push(coordinate)
+            }else{
+              appear3.push(coordinate)
+            }
+          }
+          if (mapAppear.get(keyCheck) == 2) {
+            if(checkPriority.has(keyCheck)){
+              priority.push(coordinate)
+            }else{
+              appear2.push(coordinate)
+            }
+          }
+          if (mapAppear.get(keyCheck) == 1) {
+            if(checkPriority.has(keyCheck)){
+              priority.push(coordinate)
+            }else{
+              appear1.push(coordinate)
+            }
           }
         }
       }
     });
-    let fullAppear = [...appear5, ...appear4, ...appear3, ...appear2, ...appear1]
+    let fullAppear: Coordinate[] = [...priority,...appear5, ...appear4, ...appear3, ...appear2, ...appear1]
     game.setCountAppear(mapAppear)
     fullAppear.forEach(coordinate => {
       huntShotQueue.push(coordinate)
     })
+    console.log("priority ", priority.length);
     console.log("appear5 ", appear5.length);
     console.log("appear4 ", appear4.length);
     console.log("appear3 ", appear3.length);
